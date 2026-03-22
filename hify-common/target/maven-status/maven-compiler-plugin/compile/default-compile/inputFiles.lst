@@ -6,10 +6,12 @@
 /Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/config/WebMvcConfig.java
 /Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/dto/PageResult.java
 /Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/dto/Result.java
+/Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/entity/BaseEntity.java
 /Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/exception/BizException.java
 /Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/exception/ErrorCode.java
 /Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/exception/GlobalExceptionHandler.java
 /Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/http/LlmApiException.java
 /Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/http/LlmHttpClient.java
 /Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/log/RequestLogInterceptor.java
+/Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/mapper/BaseMapper.java
 /Users/oker/Desktop/hify/hify-common/src/main/java/com/hify/common/resilience/CircuitBreakerService.java

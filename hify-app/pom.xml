@@ -56,6 +56,13 @@
             <groupId>com.hify</groupId>
             <artifactId>hify-chat</artifactId>
         </dependency>
+
+        <!-- H2 内存数据库，仅用于 mock profile -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -66,6 +73,13 @@
                 <configuration>
                     <mainClass>com.hify.app.HifyApplication</mainClass>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -1,0 +1,380 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 3.81
+# Copyright (C) 2006  Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.
+# There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+# This program built for i386-apple-darwin11.3.0
+ 
+make: *** No rule to make target `all'.  Stop.
+
+
+# Make data base, printed on Sun Mar 22 18:27:29 2026
+
+# Variables
+
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# environment
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
+# environment
+VSCEXT_STACK_ANALYSIS_COMMAND = rhda.stackAnalysis
+# environment
+VSCEXT_TELEMETRY_ID = 3a25a3bc-8e67-47c4-9aec-b0379d3a7ed4
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+VSCEXT_TRUSTIFY_DA_PIP_PATH = pip
+# environment
+VSCEXT_TRUSTIFY_DA_PNPM_PATH = pnpm
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# automatic
+@F = $(notdir $@)
+# makefile
+CURDIR := /Users/oker/Desktop/hify
+# environment
+VSCEXT_MATCH_MANIFEST_VERSIONS = true
+# makefile
+SHELL = /bin/sh
+# makefile (from `Makefile', line 1)
+ROOT_DIR := /Users/oker/Desktop/hify
+# environment
+VSCODE_NLS_CONFIG = {"userLocale":"zh-cn","osLocale":"zh-cn","resolvedLanguage":"zh-cn","defaultMessagesFile":"/Users/oker/Desktop/Visual Studio Code.app/Contents/Resources/app/out/nls.messages.json","languagePack":{"translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/tcf.json","messagesFile":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/07ff9d6178ede9a1bd12ad3399074d726ebe6e43/nls.messages.json","corruptMarkerFile":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/corrupted.info"},"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"35a1e3407274b3d50a7445feae75b010.zh-cn","_languagePackSupport":true,"_translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/tcf.json","_cacheRoot":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn","_resolvedLanguagePackCoreLocation":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/07ff9d6178ede9a1bd12ad3399074d726ebe6e43","_corruptedFile":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/corrupted.info"}
+# environment
+_ = /usr/bin/make
+# makefile (from `Makefile', line 1)
+MAKEFILE_LIST :=  Makefile
+# makefile (from `Makefile', line 2)
+VERSION := 0.0.1-SNAPSHOT
+# environment
+__CFBundleIdentifier = com.microsoft.VSCode
+# environment
+INFOPATH = /opt/homebrew/share/info:
+# environment
+VSCEXT_TRUSTIFY_DA_SKOPEO_PATH = skopeo
+# environment
+VSCODE_CWD = /
+# environment
+PATH = /Users/oker/okgit:/opt/homebrew/opt/mysql@8.0/bin:/Users/oker/okgit:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/oker/.cargo/bin
+# environment
+VSCEXT_ENABLE_PYTHON_BEST_EFFORTS_INSTALLATION = false
+# makefile (from `Makefile', line 4)
+PACKAGE_DIR := /Users/oker/Desktop/hify/dist/hify-0.0.1-SNAPSHOT
+# environment
+NODE_EXTRA_CA_CERTS = /etc/ssl/copilot.pem
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# default
+.FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
+# environment
+VSCEXT_TRUSTIFY_DA_PODMAN_PATH = podman
+# environment
+VSCEXT_TRUSTIFY_DA_PYTHON_PATH = python
+# environment
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.41pE8fSb19/Listeners
+# automatic
+%F = $(notdir $%)
+# environment
+PWD = /Users/oker/Desktop/hify
+# environment
+VSCEXT_TRACK_RECOMMENDATION_ACCEPTANCE_COMMAND = rhda.trackRecommendationAcceptance
+# environment
+VSCEXT_TRUSTIFY_DA_IMAGE_PLATFORM = 
+# environment
+VSCEXT_USE_GO_MVS = false
+# environment
+MANPATH = /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/share/man:/Library/Developer/CommandLineTools/usr/share/man:/Library/Developer/CommandLineTools/Toolchains/XcodeDefault.xctoolchain/usr/share/man:
+# environment
+HOME = /Users/oker
+# environment
+HOMEBREW_CELLAR = /opt/homebrew/Cellar
+# default
+MAKEFILEPATH = $(shell /usr/bin/xcode-select -print-path 2>/dev/null || echo /Developer)/Makefiles
+# environment
+VSCODE_CODE_CACHE_PATH = /Users/oker/Library/Application Support/Code/CachedData/07ff9d6178ede9a1bd12ad3399074d726ebe6e43
+# environment
+VSCEXT_TRUSTIFY_DA_BACKEND_URL = https://rhda.rhcloud.com
+# environment
+LOGNAME = oker
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+# environment
+VSCEXT_USE_PIP_DEP_TREE = false
+# environment
+VSCEXT_TRUSTIFY_DA_SYFT_CONFIG_PATH = 
+# environment
+CLAUDE_AGENT_SDK_VERSION = 0.2.81
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+XPC_FLAGS = 0x0
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+VSCEXT_PROXY_URL = 
+# environment
+SHLVL = 1
+# environment
+VSCODE_ESM_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+VSCEXT_TRUSTIFY_DA_GRADLE_PATH = gradle
+# environment
+VSCEXT_TRUSTIFY_DA_DOCKER_PATH = docker
+# default
+MAKE_VERSION := 3.81
+# environment
+USER = oker
+# makefile
+.DEFAULT_GOAL := start
+# environment
+APPLICATION_INSIGHTS_NO_STATSBEAT = true
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+MACH_PORT_RENDEZVOUS_PEER_VALDATION = 0
+# default
+MAKE_COMMAND := /Library/Developer/CommandLineTools/usr/bin/make
+# environment
+VSCEXT_TRUSTIFY_DA_PIP3_PATH = pip3
+# environment
+VSCEXT_UTM_SOURCE = vscode
+# default
+.VARIABLES := 
+# environment
+TMPDIR = /var/folders/_7/5lmbf13d2_x5st3tm5t_jb980000gp/T/
+# environment
+VSCEXT_TRUSTIFY_DA_MVN_ARGS = []
+# automatic
+*F = $(notdir $*)
+# environment
+VSCODE_IPC_HOOK = /Users/oker/Library/Application Support/Code/1.11-main.sock
+# environment
+VSCEXT_TRUSTIFY_DA_MVN_PATH = mvn
+# environment
+VSCEXT_TRUSTIFY_DA_PREFER_GRADLEW = true
+# environment
+MallocNanoZone = 0
+# makefile
+MAKEFLAGS = Rrqp
+# environment
+MFLAGS = -Rrqp
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+XPC_SERVICE_NAME = application.com.microsoft.VSCode.191536680.191536686
+# environment
+HOMEBREW_PREFIX = /opt/homebrew
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = file:///Users/oker/.vscode/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.110.2026031919/translations/extensions/vscode.json-language-features.i18n.json
+# automatic
++F = $(notdir $+)
+# environment
+VSCEXT_TRUSTIFY_DA_GO_PATH = go
+# environment
+HOMEBREW_REPOSITORY = /opt/homebrew
+# makefile (from `Makefile', line 3)
+PACKAGE_NAME := hify-0.0.1-SNAPSHOT
+# environment
+VSCEXT_TRUSTIFY_DA_SYFT_PATH = syft
+# environment
+__CF_USER_TEXT_ENCODING = 0x1F6:0x19:0x34
+# environment
+COMMAND_MODE = unix2003
+# default
+MAKEFILES := 
+# environment
+VSCEXT_TRUSTIFY_DA_YARN_PATH = yarn
+# automatic
+<F = $(notdir $<)
+# environment
+LC_ALL = C
+# environment
+PIP_TRUSTED_HOST = files.pythonhosted.org pypi.tuna.tsinghua.edu.cn mirrors.cloud.tencent.com mirrors.aliyun.com mirrors.ustc.edu.cn pypi.mirrors.ustc.edu.cn mirrors.bfsu.edu.cn
+# environment
+VSCEXT_VULNERABILITY_ALERT_SEVERITY = Error
+# environment
+VSCEXT_USE_PYTHON_VIRTUAL_ENVIRONMENT = false
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# environment
+VSCEXT_TRUSTIFY_DA_PREFER_MVNW = true
+# environment
+MAKELEVEL := 0
+# environment
+VSCEXT_TRUSTIFY_DA_SKOPEO_CONFIG_PATH = 
+# environment
+VSCEXT_TRUSTIFY_DA_NPM_PATH = npm
+# environment
+LANG = C
+# environment
+VSCODE_PID = 16128
+# environment
+VSCEXT_TRUSTIFY_DA_PYTHON3_PATH = python3
+# variable set hash-table stats:
+# Load=104/1024=10%, Rehash=0, Collisions=7/134=5%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 16777230, inode 192426922): 22 files, no impossibilities.
+
+# 22 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+stop:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile', line 12):
+	@bash $(ROOT_DIR)/stop.sh
+	
+
+# Not a target:
+all:
+#  Command-line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+.PHONY: start stop restart build clean package
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2026-03-22 16:41:40
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+start:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile', line 9):
+	@bash $(ROOT_DIR)/start.sh
+	
+
+build: build-backend build-frontend
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+
+build-backend:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  commands to execute (from `Makefile', line 19):
+	@echo "[BUILD] 构建后端..."
+	@mvn -f $(ROOT_DIR)/pom.xml clean package -DskipTests -q
+	@echo "[BUILD] 后端构建完成"
+	
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+build-frontend:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  commands to execute (from `Makefile', line 24):
+	@echo "[BUILD] 构建前端..."
+	@npm --prefix $(ROOT_DIR)/hify-web install --silent
+	@npm --prefix $(ROOT_DIR)/hify-web run build
+	@echo "[BUILD] 前端构建完成"
+	
+
+package: build
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile', line 41):
+	@echo "[PACKAGE] 打包 $(PACKAGE_NAME) ..."
+	@mkdir -p $(PACKAGE_DIR)
+	@JAR=$$(find $(ROOT_DIR)/hify-app/target -maxdepth 1 -name "*.jar" ! -name "*sources*" | head -1); \
+	cp "$$JAR" $(PACKAGE_DIR)/hify-app.jar
+	@cp -r $(ROOT_DIR)/hify-web/dist $(PACKAGE_DIR)/web
+	@cp $(ROOT_DIR)/hify-app/src/main/resources/application.yml $(PACKAGE_DIR)/application.yml
+	@cp $(ROOT_DIR)/start.sh $(ROOT_DIR)/stop.sh $(PACKAGE_DIR)/
+	@chmod +x $(PACKAGE_DIR)/start.sh $(PACKAGE_DIR)/stop.sh
+	@cd $(ROOT_DIR)/dist && tar -czf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)
+	@echo "[PACKAGE] 产物：$(ROOT_DIR)/dist/$(PACKAGE_NAME).tar.gz"
+	
+
+restart: stop start
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile', line 30):
+	@echo "[CLEAN] 清理后端构建产物..."
+	@mvn -f $(ROOT_DIR)/pom.xml clean -q
+	@echo "[CLEAN] 清理前端构建产物..."
+	@rm -rf $(ROOT_DIR)/hify-web/dist
+	@echo "[CLEAN] 清理日志和 PID..."
+	@rm -rf $(ROOT_DIR)/logs $(ROOT_DIR)/.pids
+	@echo "[CLEAN] 清理打包目录..."
+	@rm -rf $(ROOT_DIR)/dist
+	@echo "[CLEAN] 完成"
+	
+
+# files hash-table stats:
+# Load=13/1024=1%, Rehash=0, Collisions=1/36=3%
+# VPATH Search Paths
+
+# No `vpath' search paths.
+
+# No general (`VPATH' variable) search path.
+
+# # of strings in strcache: 1
+# # of strcache buffers: 1
+# strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
+# strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
+
+# Finished Make data base on Sun Mar 22 18:27:29 2026
+
+ 

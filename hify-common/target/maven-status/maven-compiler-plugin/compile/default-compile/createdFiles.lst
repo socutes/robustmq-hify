@@ -13,5 +13,7 @@ com/hify/common/http/LlmApiException$Type.class
 com/hify/common/config/WebMvcConfig.class
 com/hify/common/config/MyBatisPlusConfig.class
 com/hify/common/config/ThreadPoolConfig.class
+com/hify/common/entity/BaseEntity.class
+com/hify/common/mapper/BaseMapper.class
 com/hify/common/dto/Result.class
 com/hify/common/resilience/CircuitBreakerService.class

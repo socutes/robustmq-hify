@@ -102,6 +102,33 @@ public class LlmHttpClient {
         }
     }
 
+    /**
+     * 同步 GET，返回响应体字符串。
+     * 可传入自定义 OkHttpClient（用于连通性测试的 10s 超时客户端）。
+     */
+    public String get(String url, Map<String, String> headers, OkHttpClient client) {
+        Request.Builder builder = new Request.Builder().url(url).get();
+        if (headers != null) {
+            headers.forEach(builder::header);
+        }
+        long start = System.currentTimeMillis();
+        try (Response response = client.newCall(builder.build()).execute()) {
+            long elapsed = System.currentTimeMillis() - start;
+            log.info("LLM GET {} status={} cost={}ms", url, response.code(), elapsed);
+            checkStatus(response.code(), url);
+            ResponseBody responseBody = response.body();
+            return responseBody != null ? responseBody.string() : "";
+        } catch (SocketTimeoutException e) {
+            log.warn("LLM GET {} timeout after {}ms", url, System.currentTimeMillis() - start);
+            throw new LlmApiException(LlmApiException.Type.TIMEOUT, "请求超时：" + url, e);
+        } catch (LlmApiException e) {
+            throw e;
+        } catch (IOException e) {
+            log.error("LLM GET {} error: {}", url, e.getMessage());
+            throw new LlmApiException(LlmApiException.Type.UNKNOWN, "请求异常：" + e.getMessage(), e);
+        }
+    }
+
     // ── 私有工具方法 ──────────────────────────────────────────
 
     private Request buildRequest(String url, Map<String, String> headers, String body) {

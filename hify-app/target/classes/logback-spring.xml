@@ -6,10 +6,14 @@
     <property name="LOG_PATTERN" value="%d{HH:mm:ss} [%thread] [%X{traceId}] %-5level %logger{20} - %msg%n"/>
 
     <!-- ── 开发环境：控制台彩色输出 ─────────────────────────── -->
-    <springProfile name="default,dev">
+    <!-- 开发/mock 共用普通控制台，彩色扩展通过 Spring Boot 的 conversion rule 注册 -->
+    <conversionRule conversionWord="clr"
+                    converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+
+    <springProfile name="default,dev,mock">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                <pattern>%clr(%d{HH:mm:ss}){faint} %clr([%thread]){magenta} %clr([%X{traceId}]){cyan} %clr(%-5level) %clr(%logger{20}){cyan} - %msg%n</pattern>
+                <pattern>%d{HH:mm:ss} [%thread] [%X{traceId}] %-5level %logger{20} - %msg%n</pattern>
                 <charset>UTF-8</charset>
             </encoder>
         </appender>
