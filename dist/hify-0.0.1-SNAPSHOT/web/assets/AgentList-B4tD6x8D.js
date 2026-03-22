@@ -1,0 +1,1 @@
+import{_ as e}from"./_plugin-vue_export-helper-DlAUqK2U.js";import{c as t,b as c}from"./index-DxkwyyXp.js";const n={};function r(o,s){return c(),t("div",null,"Agent 管理")}const f=e(n,[["render",r]]);export{f as default};

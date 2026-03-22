@@ -1,0 +1,192 @@
+/* ============================================================
+   Hify Design Tokens
+   风格参考：Linear / Supabase
+   侧边栏深色 + 内容区浅色 + 蓝紫主色 + 青色辅色
+   ============================================================ */
+
+:root {
+
+  /* ── 主色（蓝紫） ──────────────────────────────────────────
+     用于：主按钮、链接、选中态、焦点环、进度条
+  ── */
+  --color-primary-50:  #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;   /* 主色基准 */
+  --color-primary-600: #4f46e5;   /* 主按钮悬停 */
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+
+  /* ── 辅色（青色/薄荷） ────────────────────────────────────
+     用于：状态徽章、数据标注、Tag、辅助高亮
+  ── */
+  --color-accent-50:  #ecfdf5;
+  --color-accent-100: #d1fae5;
+  --color-accent-200: #a7f3d0;
+  --color-accent-300: #6ee7b7;
+  --color-accent-400: #34d399;
+  --color-accent-500: #10b981;   /* 辅色基准（也作成功色） */
+  --color-accent-600: #059669;
+  --color-accent-700: #047857;
+
+  /* ── 内容区背景（浅色阶）──────────────────────────────────
+     page      页面底色
+     surface   卡片 / 面板
+     elevated  弹层 / Dropdown / Modal
+     overlay   遮罩蒙层
+  ── */
+  --color-bg-page:     #f8f9fc;
+  --color-bg-surface:  #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-bg-overlay:  rgba(15, 15, 30, 0.45);
+
+  /* 悬停 / 选中的微妙填充 */
+  --color-bg-hover:    #f1f2f7;
+  --color-bg-active:   #e8eaf6;
+  --color-bg-selected: #eef2ff;   /* primary-50 */
+
+  /* ── 侧边栏（深色）───────────────────────────────────────
+     科技感来源：深色侧边栏 + 亮色选中态
+  ── */
+  --color-sidebar-bg:          #0f1117;
+  --color-sidebar-surface:     #181c27;
+  --color-sidebar-hover:       #1e2231;
+  --color-sidebar-active:      #252a3d;
+  --color-sidebar-text:        #a8afc4;
+  --color-sidebar-text-active: #ffffff;
+  --color-sidebar-border:      rgba(255, 255, 255, 0.06);
+  /* 选中条 */
+  --color-sidebar-indicator:   var(--color-primary-500);
+
+  /* ── 文字色阶 ────────────────────────────────────────────
+     在浅色内容区使用
+  ── */
+  --color-text-primary:   #0f1117;   /* 标题、正文主体 */
+  --color-text-secondary: #4b5268;   /* 次要描述、label */
+  --color-text-tertiary:  #8b92a8;   /* placeholder、禁用态 */
+  --color-text-disabled:  #c2c7d8;
+  --color-text-inverse:   #ffffff;   /* 深色背景上的文字 */
+  --color-text-link:      var(--color-primary-600);
+  --color-text-link-hover:var(--color-primary-700);
+
+  /* ── 边框色 ──────────────────────────────────────────────*/
+  --color-border-default: #e3e6ef;
+  --color-border-strong:  #c8ccdb;
+  --color-border-focus:   var(--color-primary-500);
+  --color-border-error:   var(--color-danger-500);
+
+  /* ── 语义色 ──────────────────────────────────────────────*/
+  --color-success-50:  #ecfdf5;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+
+  --color-warning-50:  #fffbeb;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+
+  --color-danger-50:   #fef2f2;
+  --color-danger-500:  #ef4444;
+  --color-danger-600:  #dc2626;
+
+  --color-info-50:     #eff6ff;
+  --color-info-500:    #3b82f6;
+  --color-info-600:    #2563eb;
+
+  /* ── 圆角 ────────────────────────────────────────────────*/
+  --radius-xs:  2px;   /* Tag 内小标记 */
+  --radius-sm:  4px;   /* 徽章、小按钮 */
+  --radius-md:  6px;   /* 按钮、Input、Select（主要使用） */
+  --radius-lg:  8px;   /* 卡片、面板 */
+  --radius-xl:  12px;  /* Modal、Drawer */
+  --radius-2xl: 16px;  /* 大卡片 */
+  --radius-full: 9999px; /* 胶囊按钮、头像 */
+
+  /* ── 阴影 ────────────────────────────────────────────────
+     遵循层级语义，不是装饰性阴影
+  ── */
+  --shadow-xs:  0 1px 2px rgba(15, 15, 30, 0.06);
+  --shadow-sm:  0 1px 4px rgba(15, 15, 30, 0.08), 0 0 0 1px rgba(15, 15, 30, 0.04);
+  --shadow-md:  0 4px 12px rgba(15, 15, 30, 0.10), 0 1px 4px rgba(15, 15, 30, 0.06);
+  --shadow-lg:  0 8px 24px rgba(15, 15, 30, 0.12), 0 2px 8px rgba(15, 15, 30, 0.08);
+  --shadow-xl:  0 16px 48px rgba(15, 15, 30, 0.16), 0 4px 12px rgba(15, 15, 30, 0.08);
+
+  /* 焦点环（无障碍） */
+  --shadow-focus-ring: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  /* 主色发光（按钮 active 态） */
+  --shadow-primary-glow: 0 4px 14px rgba(99, 102, 241, 0.35);
+
+  /* ── 间距 ────────────────────────────────────────────────
+     基于 4px 网格
+  ── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── 字体 ────────────────────────────────────────────────*/
+  --font-sans: "Inter", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, monospace;
+
+  --text-xs:   12px;
+  --text-sm:   13px;
+  --text-base: 14px;   /* 正文基准 */
+  --text-md:   15px;
+  --text-lg:   16px;
+  --text-xl:   18px;
+  --text-2xl:  20px;
+  --text-3xl:  24px;
+
+  --leading-tight:  1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed:1.75;
+
+  --font-regular: 400;
+  --font-medium:  500;
+  --font-semibold:600;
+  --font-bold:    700;
+
+  /* ── 过渡动效 ─────────────────────────────────────────────
+     遵循 "快进慢出" 原则：进场稍慢（150ms），退场稍快（100ms）
+  ── */
+  --duration-fast:   100ms;
+  --duration-base:   150ms;
+  --duration-slow:   250ms;
+  --duration-slower: 350ms;
+
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);   /* Material standard */
+  --ease-in:      cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:     cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1); /* 弹性，用于菜单展开 */
+
+  /* 常用组合 */
+  --transition-base:    all var(--duration-base) var(--ease-default);
+  --transition-colors:  background-color var(--duration-base) var(--ease-default),
+                        border-color var(--duration-base) var(--ease-default),
+                        color var(--duration-base) var(--ease-default);
+  --transition-shadow:  box-shadow var(--duration-base) var(--ease-default);
+  --transition-transform: transform var(--duration-slow) var(--ease-spring);
+
+  /* ── 布局 ────────────────────────────────────────────────*/
+  --sidebar-width:         220px;
+  --sidebar-width-collapsed: 56px;
+  --header-height:         56px;
+  --content-max-width:     1200px;
+
+  /* ── z-index 层级 ─────────────────────────────────────────*/
+  --z-base:    0;
+  --z-above:   1;
+  --z-sticky:  100;
+  --z-dropdown:200;
+  --z-modal:   300;
+  --z-toast:   400;
+  --z-tooltip: 500;
+}

@@ -1,0 +1,124 @@
+/* ============================================================
+   Element Plus 变量覆盖
+   把 Hify Design Token 映射到 EP 的 CSS 变量
+   ============================================================ */
+
+:root {
+  /* 主色 */
+  --el-color-primary:         var(--color-primary-500);
+  --el-color-primary-light-3: var(--color-primary-300);
+  --el-color-primary-light-5: var(--color-primary-200);
+  --el-color-primary-light-7: var(--color-primary-100);
+  --el-color-primary-light-9: var(--color-primary-50);
+  --el-color-primary-dark-2:  var(--color-primary-600);
+
+  /* 语义色 */
+  --el-color-success: var(--color-success-500);
+  --el-color-warning: var(--color-warning-500);
+  --el-color-danger:  var(--color-danger-500);
+  --el-color-info:    var(--color-info-500);
+
+  /* 文字 */
+  --el-text-color-primary:   var(--color-text-primary);
+  --el-text-color-regular:   var(--color-text-secondary);
+  --el-text-color-secondary: var(--color-text-tertiary);
+  --el-text-color-placeholder: var(--color-text-disabled);
+
+  /* 边框 */
+  --el-border-color:        var(--color-border-default);
+  --el-border-color-light:  var(--color-border-default);
+  --el-border-color-lighter:var(--color-border-default);
+
+  /* 背景 */
+  --el-bg-color:          var(--color-bg-surface);
+  --el-bg-color-page:     var(--color-bg-page);
+  --el-bg-color-overlay:  var(--color-bg-elevated);
+
+  /* 填充（hover 态） */
+  --el-fill-color:        var(--color-bg-hover);
+  --el-fill-color-light:  var(--color-bg-hover);
+  --el-fill-color-lighter:var(--color-bg-page);
+
+  /* 圆角 */
+  --el-border-radius-base:  var(--radius-md);
+  --el-border-radius-small: var(--radius-sm);
+  --el-border-radius-round: var(--radius-full);
+
+  /* 阴影 */
+  --el-box-shadow:       var(--shadow-md);
+  --el-box-shadow-light: var(--shadow-sm);
+  --el-box-shadow-base:  var(--shadow-md);
+
+  /* 过渡 */
+  --el-transition-duration:      var(--duration-base);
+  --el-transition-duration-fast: var(--duration-fast);
+
+  /* 字体 */
+  --el-font-family: var(--font-sans);
+  --el-font-size-base:   var(--text-base);
+  --el-font-size-small:  var(--text-sm);
+  --el-font-size-large:  var(--text-lg);
+
+  /* z-index */
+  --el-index-normal:  var(--z-above);
+  --el-index-top:     var(--z-dropdown);
+  --el-index-popper:  var(--z-dropdown);
+}
+
+/* ── Button ──────────────────────────────────────────────── */
+.el-button--primary {
+  --el-button-bg-color:     var(--color-primary-500);
+  --el-button-border-color: var(--color-primary-500);
+  --el-button-hover-bg-color:     var(--color-primary-600);
+  --el-button-hover-border-color: var(--color-primary-600);
+  --el-button-active-bg-color:    var(--color-primary-700);
+  font-weight: var(--font-medium);
+}
+.el-button--primary:not(.is-disabled):active {
+  box-shadow: var(--shadow-primary-glow);
+}
+
+/* ── Table ───────────────────────────────────────────────── */
+.el-table {
+  --el-table-border-color:      var(--color-border-default);
+  --el-table-header-bg-color:   var(--color-bg-page);
+  --el-table-header-text-color: var(--color-text-secondary);
+  --el-table-row-hover-bg-color:var(--color-bg-hover);
+  --el-table-current-row-bg-color: var(--color-bg-selected);
+}
+.el-table th {
+  font-weight: var(--font-semibold);
+  font-size: var(--text-sm);
+}
+
+/* ── Menu（内容区水平菜单，与侧边栏区分）────────────────── */
+.el-menu:not(.sidebar-menu) {
+  --el-menu-active-color:   var(--color-primary-600);
+  --el-menu-hover-bg-color: var(--color-bg-hover);
+  border-right: none;
+}
+
+/* ── Card ────────────────────────────────────────────────── */
+.el-card {
+  --el-card-border-color:  var(--color-border-default);
+  --el-card-border-radius: var(--radius-lg);
+  --el-card-padding:       var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Tag ─────────────────────────────────────────────────── */
+.el-tag {
+  --el-tag-border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+}
+
+/* ── Input / Select ──────────────────────────────────────── */
+.el-input__wrapper,
+.el-select .el-input__wrapper {
+  transition: var(--transition-shadow);
+}
+.el-input__wrapper:focus-within,
+.el-select .el-input__wrapper:focus-within {
+  box-shadow: var(--shadow-focus-ring), 0 0 0 1px var(--color-primary-500);
+}
