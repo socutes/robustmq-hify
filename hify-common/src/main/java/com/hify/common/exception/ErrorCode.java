@@ -19,6 +19,9 @@ public enum ErrorCode {
     PROVIDER_NAME_DUPLICATE(2001, "提供商名称已存在"),
     PROVIDER_DISABLED(2002, "模型提供商已禁用"),
     PROVIDER_CONNECTION_FAILED(2003, "提供商连通性测试失败"),
+    PROVIDER_TYPE_NOT_SUPPORTED(2004, "不支持的供应商类型"),
+    MODEL_CONFIG_NOT_FOUND(2005, "模型配置不存在"),
+    MODEL_CONFIG_DISABLED(2006, "模型配置已禁用"),
 
     // 3000-3999 Agent
     AGENT_NOT_FOUND(3000, "Agent 不存在"),

@@ -22,6 +22,12 @@
             <artifactId>hify-common</artifactId>
         </dependency>
 
+        <!-- hify-provider (cross-module: validate modelConfigId) -->
+        <dependency>
+            <groupId>com.hify</groupId>
+            <artifactId>hify-provider</artifactId>
+        </dependency>
+
         <!-- hify-mcp (Agent binds MCP tools) -->
         <dependency>
             <groupId>com.hify</groupId>

@@ -12,6 +12,7 @@ import com.hify.provider.dto.ProviderQueryRequest;
 import com.hify.provider.dto.ProviderUpdateRequest;
 import com.hify.provider.entity.ModelConfig;
 import com.hify.provider.entity.Provider;
+import com.hify.provider.service.ProviderService;
 import com.hify.provider.entity.ProviderHealth;
 import com.hify.provider.mapper.ModelConfigMapper;
 import com.hify.provider.mapper.ProviderHealthMapper;
@@ -130,6 +131,18 @@ public class ProviderServiceImpl implements ProviderService {
         }).collect(Collectors.toList());
 
         return PageResult.of(items, page.getTotal(), (int) page.getCurrent(), (int) page.getSize());
+    }
+
+    @Override
+    public ModelConfig getEnabledModelConfigOrThrow(Long modelConfigId) {
+        ModelConfig mc = modelConfigMapper.selectById(modelConfigId);
+        if (mc == null) {
+            throw new BizException(ErrorCode.MODEL_CONFIG_NOT_FOUND);
+        }
+        if (mc.getEnabled() != 1) {
+            throw new BizException(ErrorCode.MODEL_CONFIG_DISABLED);
+        }
+        return mc;
     }
 
     // ── 内部工具 ───────────────────────────────────────────────

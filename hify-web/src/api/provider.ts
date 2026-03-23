@@ -12,10 +12,9 @@ export interface ProviderHealth {
 
 export interface ModelConfig {
   id: number
+  name: string
   modelId: string
-  displayName: string
-  enabled: boolean
-  maxTokens: number | null
+  enabled: number
 }
 
 export interface ProviderVO {

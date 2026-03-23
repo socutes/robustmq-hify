@@ -78,15 +78,18 @@ CREATE TABLE IF NOT EXISTS mcp_server (
 -- Agent 配置
 -- ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS agent (
-    id              BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键',
-    name            VARCHAR(100)    NOT NULL                COMMENT 'Agent 名称',
-    model_config_id BIGINT          NOT NULL                COMMENT '绑定的模型配置 id',
-    system_prompt   TEXT            DEFAULT ''              COMMENT 'System Prompt',
-    description     VARCHAR(500)    DEFAULT ''              COMMENT '描述',
-    enabled         TINYINT(1)      NOT NULL DEFAULT 1      COMMENT '是否启用',
-    deleted         TINYINT(1)      NOT NULL DEFAULT 0      COMMENT '逻辑删除',
-    created_at      DATETIME        NOT NULL                COMMENT '创建时间',
-    updated_at      DATETIME        NOT NULL                COMMENT '更新时间',
+    id                BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    name              VARCHAR(100)    NOT NULL                COMMENT 'Agent 名称',
+    description       VARCHAR(500)    DEFAULT ''              COMMENT '描述',
+    system_prompt     TEXT            DEFAULT ''              COMMENT 'System Prompt',
+    model_config_id   BIGINT          NOT NULL                COMMENT '绑定的模型配置 id',
+    temperature       DECIMAL(3,2)    NOT NULL DEFAULT 0.70   COMMENT '温度参数 0.00~1.00',
+    max_tokens        INT             NOT NULL DEFAULT 2048   COMMENT '最大输出 token 数',
+    max_context_turns INT             NOT NULL DEFAULT 10     COMMENT '保留最近几轮上下文',
+    enabled           TINYINT(1)      NOT NULL DEFAULT 1      COMMENT '是否启用',
+    deleted           TINYINT(1)      NOT NULL DEFAULT 0      COMMENT '逻辑删除',
+    created_at        DATETIME        NOT NULL                COMMENT '创建时间',
+    updated_at        DATETIME        NOT NULL                COMMENT '更新时间',
     PRIMARY KEY (id),
     UNIQUE KEY idx_agent_name (name),
     KEY idx_agent_model_config_id (model_config_id)
