@@ -77,18 +77,21 @@ CREATE TABLE IF NOT EXISTS chat_session (
     id         BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
     agent_id   BIGINT          NOT NULL,
     title      VARCHAR(200)    DEFAULT '',
+    status     VARCHAR(20)     NOT NULL DEFAULT 'ACTIVE',
     deleted    TINYINT         NOT NULL DEFAULT 0,
     created_at DATETIME        NOT NULL,
     updated_at DATETIME        NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS chat_message (
-    id         BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    session_id BIGINT          NOT NULL,
-    role       VARCHAR(20)     NOT NULL,
-    content    CLOB            NOT NULL,
-    tokens     INT             DEFAULT 0,
-    deleted    TINYINT         NOT NULL DEFAULT 0,
-    created_at DATETIME        NOT NULL,
-    updated_at DATETIME        NOT NULL
+    id            BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    session_id    BIGINT          NOT NULL,
+    role          VARCHAR(20)     NOT NULL,
+    content       CLOB            NOT NULL,
+    tokens        INT             DEFAULT 0,
+    finish_reason VARCHAR(50)     DEFAULT '',
+    latency_ms    INT             DEFAULT 0,
+    deleted       TINYINT         NOT NULL DEFAULT 0,
+    created_at    DATETIME        NOT NULL,
+    updated_at    DATETIME        NOT NULL
 );

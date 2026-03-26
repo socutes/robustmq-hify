@@ -12,6 +12,7 @@ import com.hify.provider.entity.Provider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.function.Consumer;
 
 @Slf4j
 @Component
+@Profile("!mock")
 @RequiredArgsConstructor
 public class OllamaAdapter implements ProviderAdapter {
 

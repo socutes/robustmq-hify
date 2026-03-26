@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS chat_session (
     id         BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键',
     agent_id   BIGINT          NOT NULL                COMMENT '所属 Agent id',
     title      VARCHAR(200)    DEFAULT ''              COMMENT '会话标题',
+    status     VARCHAR(20)     NOT NULL DEFAULT 'ACTIVE' COMMENT '状态：ACTIVE / ARCHIVED',
     deleted    TINYINT(1)      NOT NULL DEFAULT 0      COMMENT '逻辑删除',
     created_at DATETIME        NOT NULL                COMMENT '创建时间',
     updated_at DATETIME        NOT NULL                COMMENT '更新时间',
@@ -127,14 +128,16 @@ CREATE TABLE IF NOT EXISTS chat_session (
 -- 对话消息（增长最快，注意分页查询性能）
 -- ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS chat_message (
-    id         BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键',
-    session_id BIGINT          NOT NULL                COMMENT '所属会话 id',
-    role       VARCHAR(20)     NOT NULL                COMMENT '消息角色：user / assistant / system',
-    content    LONGTEXT        NOT NULL                COMMENT '消息内容',
-    tokens     INT             DEFAULT 0               COMMENT '消耗 token 数',
-    deleted    TINYINT(1)      NOT NULL DEFAULT 0      COMMENT '逻辑删除',
-    created_at DATETIME        NOT NULL                COMMENT '创建时间',
-    updated_at DATETIME        NOT NULL                COMMENT '更新时间',
+    id            BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    session_id    BIGINT          NOT NULL                COMMENT '所属会话 id',
+    role          VARCHAR(20)     NOT NULL                COMMENT '消息角色：user / assistant / system',
+    content       LONGTEXT        NOT NULL                COMMENT '消息内容',
+    tokens        INT             DEFAULT 0               COMMENT '消耗 token 数',
+    finish_reason VARCHAR(50)     DEFAULT ''              COMMENT 'LLM finish_reason',
+    latency_ms    INT             DEFAULT 0               COMMENT '首 token 到流结束耗时（ms）',
+    deleted       TINYINT(1)      NOT NULL DEFAULT 0      COMMENT '逻辑删除',
+    created_at    DATETIME        NOT NULL                COMMENT '创建时间',
+    updated_at    DATETIME        NOT NULL                COMMENT '更新时间',
     PRIMARY KEY (id),
     KEY idx_chat_message_session_id (session_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='对话消息';

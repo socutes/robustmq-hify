@@ -10,7 +10,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 make: *** No rule to make target `all'.  Stop.
 
 
-# Make data base, printed on Sun Mar 22 18:27:29 2026
+# Make data base, printed on Thu Mar 26 15:09:30 2026
 
 # Variables
 
@@ -32,6 +32,7 @@ VSCEXT_TRUSTIFY_DA_PIP_PATH = pip
 VSCEXT_TRUSTIFY_DA_PNPM_PATH = pnpm
 # automatic
 @D = $(patsubst %/,%,$(dir $@))
+ 
 # automatic
 @F = $(notdir $@)
 # makefile
@@ -43,7 +44,7 @@ SHELL = /bin/sh
 # makefile (from `Makefile', line 1)
 ROOT_DIR := /Users/oker/Desktop/hify
 # environment
-VSCODE_NLS_CONFIG = {"userLocale":"zh-cn","osLocale":"zh-cn","resolvedLanguage":"zh-cn","defaultMessagesFile":"/Users/oker/Desktop/Visual Studio Code.app/Contents/Resources/app/out/nls.messages.json","languagePack":{"translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/tcf.json","messagesFile":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/07ff9d6178ede9a1bd12ad3399074d726ebe6e43/nls.messages.json","corruptMarkerFile":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/corrupted.info"},"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"35a1e3407274b3d50a7445feae75b010.zh-cn","_languagePackSupport":true,"_translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/tcf.json","_cacheRoot":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn","_resolvedLanguagePackCoreLocation":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/07ff9d6178ede9a1bd12ad3399074d726ebe6e43","_corruptedFile":"/Users/oker/Library/Application Support/Code/clp/35a1e3407274b3d50a7445feae75b010.zh-cn/corrupted.info"}
+VSCODE_NLS_CONFIG = {"userLocale":"zh-cn","osLocale":"zh-cn","resolvedLanguage":"zh-cn","defaultMessagesFile":"/Users/oker/Desktop/Visual Studio Code.app/Contents/Resources/app/out/nls.messages.json","languagePack":{"translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/66c0aababf4e9c0ad31942200148753a.zh-cn/tcf.json","messagesFile":"/Users/oker/Library/Application Support/Code/clp/66c0aababf4e9c0ad31942200148753a.zh-cn/07ff9d6178ede9a1bd12ad3399074d726ebe6e43/nls.messages.json","corruptMarkerFile":"/Users/oker/Library/Application Support/Code/clp/66c0aababf4e9c0ad31942200148753a.zh-cn/corrupted.info"},"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"66c0aababf4e9c0ad31942200148753a.zh-cn","_languagePackSupport":true,"_translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/66c0aababf4e9c0ad31942200148753a.zh-cn/tcf.json","_cacheRoot":"/Users/oker/Library/Application Support/Code/clp/66c0aababf4e9c0ad31942200148753a.zh-cn","_resolvedLanguagePackCoreLocation":"/Users/oker/Library/Application Support/Code/clp/66c0aababf4e9c0ad31942200148753a.zh-cn/07ff9d6178ede9a1bd12ad3399074d726ebe6e43","_corruptedFile":"/Users/oker/Library/Application Support/Code/clp/66c0aababf4e9c0ad31942200148753a.zh-cn/corrupted.info"}
 # environment
 _ = /usr/bin/make
 # makefile (from `Makefile', line 1)
@@ -59,7 +60,7 @@ VSCEXT_TRUSTIFY_DA_SKOPEO_PATH = skopeo
 # environment
 VSCODE_CWD = /
 # environment
-PATH = /Users/oker/okgit:/opt/homebrew/opt/mysql@8.0/bin:/Users/oker/okgit:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/oker/.cargo/bin
+PATH = /usr/local/bin/mac_agent/.globalBase/usr/bin:/Users/oker/okgit:/opt/homebrew/opt/mysql@8.0/bin:/Users/oker/okgit:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/oker/.cargo/bin
 # environment
 VSCEXT_ENABLE_PYTHON_BEST_EFFORTS_INSTALLATION = false
 # makefile (from `Makefile', line 4)
@@ -78,6 +79,8 @@ VSCEXT_TRUSTIFY_DA_PYTHON_PATH = python
 SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.41pE8fSb19/Listeners
 # automatic
 %F = $(notdir $%)
+# environment
+ENABLE_PYTHON_MIGRATION = true
 # environment
 PWD = /Users/oker/Desktop/hify
 # environment
@@ -106,8 +109,6 @@ APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 VSCEXT_USE_PIP_DEP_TREE = false
 # environment
 VSCEXT_TRUSTIFY_DA_SYFT_CONFIG_PATH = 
-# environment
-CLAUDE_AGENT_SDK_VERSION = 0.2.81
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # automatic
@@ -174,8 +175,6 @@ XPC_SERVICE_NAME = application.com.microsoft.VSCode.191536680.191536686
 HOMEBREW_PREFIX = /opt/homebrew
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
-# environment
-VSCODE_L10N_BUNDLE_LOCATION = file:///Users/oker/.vscode/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.110.2026031919/translations/extensions/vscode.json-language-features.i18n.json
 # automatic
 +F = $(notdir $+)
 # environment
@@ -219,11 +218,11 @@ VSCEXT_TRUSTIFY_DA_NPM_PATH = npm
 # environment
 LANG = C
 # environment
-VSCODE_PID = 16128
+VSCODE_PID = 49009
 # environment
 VSCEXT_TRUSTIFY_DA_PYTHON3_PATH = python3
 # variable set hash-table stats:
-# Load=104/1024=10%, Rehash=0, Collisions=7/134=5%
+# Load=103/1024=10%, Rehash=0, Collisions=7/133=5%
 
 # Pattern-specific Variable Values
 
@@ -231,9 +230,9 @@ VSCEXT_TRUSTIFY_DA_PYTHON3_PATH = python3
 
 # Directories
 
-# . (device 16777230, inode 192426922): 22 files, no impossibilities.
+# . (device 16777230, inode 192426922): 23 files, no impossibilities.
 
-# 22 files, no impossibilities in 1 directories.
+# 23 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -375,6 +374,6 @@ clean:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sun Mar 22 18:27:29 2026
+# Finished Make data base on Thu Mar 26 15:09:30 2026
 
  

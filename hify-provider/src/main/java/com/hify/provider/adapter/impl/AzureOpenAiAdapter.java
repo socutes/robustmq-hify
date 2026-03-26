@@ -7,6 +7,7 @@ import com.hify.provider.dto.ConnectionTestResult;
 import com.hify.provider.entity.Provider;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
+@Profile("!mock")
 public class AzureOpenAiAdapter extends OpenAiAdapter {
 
     public AzureOpenAiAdapter(LlmHttpClient llmHttpClient, ObjectMapper objectMapper) {

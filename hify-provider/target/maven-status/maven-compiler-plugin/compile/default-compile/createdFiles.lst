@@ -28,6 +28,7 @@ com/hify/provider/service/ProviderConnectionTestService.class
 com/hify/provider/dto/ChatMessage.class
 com/hify/provider/service/impl/package-info.class
 com/hify/provider/adapter/impl/OllamaAdapter.class
+com/hify/provider/adapter/impl/MockProviderAdapter.class
 com/hify/provider/entity/Provider.class
 com/hify/provider/entity/ProviderHealth.class
 com/hify/provider/adapter/impl/OpenAiCompatibleAdapter.class

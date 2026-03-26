@@ -2,6 +2,7 @@ package com.hify.provider.adapter.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hify.common.http.LlmHttpClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * 与 OpenAI 接口完全兼容，直接复用父类逻辑。
  */
 @Component
+@Profile("!mock")
 public class OpenAiCompatibleAdapter extends OpenAiAdapter {
 
     public OpenAiCompatibleAdapter(LlmHttpClient llmHttpClient, ObjectMapper objectMapper) {

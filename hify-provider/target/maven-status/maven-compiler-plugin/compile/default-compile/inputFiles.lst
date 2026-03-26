@@ -2,6 +2,7 @@
 /Users/oker/Desktop/hify/hify-provider/src/main/java/com/hify/provider/adapter/ProviderAdapterFactory.java
 /Users/oker/Desktop/hify/hify-provider/src/main/java/com/hify/provider/adapter/impl/AnthropicAdapter.java
 /Users/oker/Desktop/hify/hify-provider/src/main/java/com/hify/provider/adapter/impl/AzureOpenAiAdapter.java
+/Users/oker/Desktop/hify/hify-provider/src/main/java/com/hify/provider/adapter/impl/MockProviderAdapter.java
 /Users/oker/Desktop/hify/hify-provider/src/main/java/com/hify/provider/adapter/impl/OllamaAdapter.java
 /Users/oker/Desktop/hify/hify-provider/src/main/java/com/hify/provider/adapter/impl/OpenAiAdapter.java
 /Users/oker/Desktop/hify/hify-provider/src/main/java/com/hify/provider/adapter/impl/OpenAiCompatibleAdapter.java
