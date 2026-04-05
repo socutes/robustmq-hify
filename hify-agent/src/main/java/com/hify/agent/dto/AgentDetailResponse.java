@@ -25,6 +25,9 @@ public class AgentDetailResponse {
     /** 绑定的 MCP Server id 列表 */
     private List<Long> toolIds;
 
+    /** 绑定的知识库 id */
+    private Long knowledgeBaseId;
+
     public static AgentDetailResponse from(Agent agent, List<Long> toolIds) {
         AgentDetailResponse resp = new AgentDetailResponse();
         resp.setId(agent.getId());
@@ -36,6 +39,7 @@ public class AgentDetailResponse {
         resp.setMaxTokens(agent.getMaxTokens());
         resp.setMaxContextTurns(agent.getMaxContextTurns());
         resp.setEnabled(agent.getEnabled());
+        resp.setKnowledgeBaseId(agent.getKnowledgeBaseId());
         resp.setCreatedAt(agent.getCreatedAt());
         resp.setUpdatedAt(agent.getUpdatedAt());
         resp.setToolIds(toolIds);

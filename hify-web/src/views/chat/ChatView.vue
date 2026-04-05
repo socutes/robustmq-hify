@@ -8,7 +8,7 @@
         <el-button type="primary" size="small" :icon="Plus" @click="onNewSession">新建</el-button>
       </div>
 
-      <div class="session-list" ref="sessionListEl">
+      <div class="session-list">
         <div
           v-for="s in sessions"
           :key="s.id"
@@ -162,7 +162,6 @@ const newSessionVisible = ref(false)
 const newSessionAgentId = ref<number | null>(null)
 
 const messagesEl = ref<HTMLElement>()
-const sessionListEl = ref<HTMLElement>()
 
 const sessionPreviewMap = ref<Record<number, string>>({})
 
@@ -473,8 +472,8 @@ function uid() { return `tmp-${++_uid}` }
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 .msg-row.user .msg-bubble {
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--color-primary-500);
+  color: #ffffff;
   border-color: transparent;
 }
 .msg-bubble.error {

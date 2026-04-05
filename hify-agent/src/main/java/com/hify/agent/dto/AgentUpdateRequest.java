@@ -28,4 +28,7 @@ public class AgentUpdateRequest {
 
     @Min(1) @Max(100)
     private Integer maxContextTurns;
+
+    /** 绑定的知识库 id，传 null 表示不启用 RAG */
+    private Long knowledgeBaseId;
 }

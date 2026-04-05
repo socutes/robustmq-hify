@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { Setting, User, ChatDotRound, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import { Setting, User, ChatDotRound, Folder, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const collapsed = ref(window.innerWidth < 1200)
@@ -84,9 +84,10 @@ onMounted(() => window.addEventListener('resize', onResize))
 onUnmounted(() => window.removeEventListener('resize', onResize))
 
 const navItems = [
-  { path: '/provider', label: '模型管理',   icon: Setting },
-  { path: '/agent',    label: 'Agent 管理', icon: User },
-  { path: '/chat',     label: '对话',       icon: ChatDotRound },
+  { path: '/provider',   label: '模型管理',  icon: Setting },
+  { path: '/agent',      label: 'Agent',    icon: User },
+  { path: '/knowledge',  label: '知识库',   icon: Folder },
+  { path: '/chat',       label: '对话',     icon: ChatDotRound },
 ]
 
 const currentLabel = computed(() => {

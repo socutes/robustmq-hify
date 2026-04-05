@@ -28,4 +28,7 @@ public class Agent extends BaseEntity {
     private Integer maxContextTurns;
 
     private Integer enabled;
+
+    /** 绑定的知识库 id，NULL 表示不启用 RAG */
+    private Long knowledgeBaseId;
 }

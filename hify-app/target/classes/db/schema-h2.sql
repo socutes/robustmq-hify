@@ -59,10 +59,11 @@ CREATE TABLE IF NOT EXISTS agent (
     temperature       DECIMAL(3,2)    NOT NULL DEFAULT 0.70,
     max_tokens        INT             NOT NULL DEFAULT 2048,
     max_context_turns INT             NOT NULL DEFAULT 10,
-    enabled           TINYINT         NOT NULL DEFAULT 1,
-    deleted           TINYINT         NOT NULL DEFAULT 0,
-    created_at        DATETIME        NOT NULL,
-    updated_at        DATETIME        NOT NULL
+    enabled             TINYINT         NOT NULL DEFAULT 1,
+    knowledge_base_id   BIGINT          DEFAULT NULL,
+    deleted             TINYINT         NOT NULL DEFAULT 0,
+    created_at          DATETIME        NOT NULL,
+    updated_at          DATETIME        NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS agent_tool (
@@ -81,6 +82,30 @@ CREATE TABLE IF NOT EXISTS chat_session (
     deleted    TINYINT         NOT NULL DEFAULT 0,
     created_at DATETIME        NOT NULL,
     updated_at DATETIME        NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS knowledge_base (
+    id          BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(100)    NOT NULL,
+    description VARCHAR(500)    DEFAULT '',
+    enabled     TINYINT         NOT NULL DEFAULT 1,
+    deleted     TINYINT         NOT NULL DEFAULT 0,
+    created_at  DATETIME        NOT NULL,
+    updated_at  DATETIME        NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS document (
+    id                BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    knowledge_base_id BIGINT          NOT NULL,
+    name              VARCHAR(200)    NOT NULL,
+    file_type         VARCHAR(20)     NOT NULL,
+    file_size         BIGINT          NOT NULL,
+    status            VARCHAR(20)     NOT NULL DEFAULT 'PENDING',
+    error_message     VARCHAR(500)    DEFAULT '',
+    chunk_count       INT             NOT NULL DEFAULT 0,
+    deleted           TINYINT         NOT NULL DEFAULT 0,
+    created_at        DATETIME        NOT NULL,
+    updated_at        DATETIME        NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS chat_message (

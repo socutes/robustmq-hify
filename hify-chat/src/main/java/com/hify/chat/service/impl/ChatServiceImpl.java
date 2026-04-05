@@ -16,6 +16,8 @@ import com.hify.common.dto.PageResult;
 import com.hify.common.dto.Result;
 import com.hify.common.exception.BizException;
 import com.hify.common.exception.ErrorCode;
+import com.hify.knowledge.dto.ChunkVO;
+import com.hify.knowledge.service.KnowledgeService;
 import com.hify.provider.adapter.ProviderAdapter;
 import com.hify.provider.adapter.ProviderAdapterFactory;
 import com.hify.provider.dto.ChatRequest;
@@ -51,6 +53,7 @@ public class ChatServiceImpl implements ChatService {
     private final ProviderMapper providerMapper;
     private final ProviderAdapterFactory adapterFactory;
     private final ObjectMapper objectMapper;
+    private final KnowledgeService knowledgeService;
 
     @Qualifier("llmExecutor")
     private final Executor llmExecutor;
@@ -162,9 +165,16 @@ public class ChatServiceImpl implements ChatService {
         int maxMsgs = (agent.getMaxContextTurns() != null ? agent.getMaxContextTurns() : 10) * 2;
         List<Map<String, String>> contextMsgs = loadContext(sessionId, maxMsgs);
 
-        // 7. Build messages array: system + context + current user message
+        // 6.5 RAG 检索：Agent 绑了知识库则检索，否则跳过
+        List<ChunkVO> ragChunks = List.of();
+        if (agent.getKnowledgeBaseId() != null) {
+            ragChunks = knowledgeService.searchChunks(agent.getKnowledgeBaseId(), userContent, 3);
+            log.info("RAG 检索命中 {} 条 sessionId={} kbId={}", ragChunks.size(), sessionId, agent.getKnowledgeBaseId());
+        }
+
+        // 7. Build messages array: system(+RAG) + context + current user message
         List<com.hify.provider.dto.ChatMessage> messages = buildMessages(
-                agent.getSystemPrompt(), contextMsgs, userContent);
+                agent.getSystemPrompt(), ragChunks, contextMsgs, userContent);
 
         // 8. Build ChatRequest
         ChatRequest chatRequest = ChatRequest.builder()
@@ -228,8 +238,13 @@ public class ChatServiceImpl implements ChatService {
 
         int maxMsgs = (agent.getMaxContextTurns() != null ? agent.getMaxContextTurns() : 10) * 2;
         List<Map<String, String>> contextMsgs = loadContext(sessionId, maxMsgs);
+
+        List<ChunkVO> ragChunks = List.of();
+        if (agent.getKnowledgeBaseId() != null) {
+            ragChunks = knowledgeService.searchChunks(agent.getKnowledgeBaseId(), userContent, 3);
+        }
         List<com.hify.provider.dto.ChatMessage> messages = buildMessages(
-                agent.getSystemPrompt(), contextMsgs, userContent);
+                agent.getSystemPrompt(), ragChunks, contextMsgs, userContent);
 
         ChatRequest chatRequest = ChatRequest.builder()
                 .modelId(modelConfig.getModelId())
@@ -310,14 +325,18 @@ public class ChatServiceImpl implements ChatService {
 
     private List<com.hify.provider.dto.ChatMessage> buildMessages(
             String systemPrompt,
+            List<ChunkVO> ragChunks,
             List<Map<String, String>> contextMsgs,
             String userContent) {
 
+        // 拼 system prompt：Agent 原始 Prompt + RAG 检索结果（如果有）
+        String finalSystem = buildSystemPrompt(systemPrompt, ragChunks);
+
         List<com.hify.provider.dto.ChatMessage> msgs = new ArrayList<>();
-        if (systemPrompt != null && !systemPrompt.isBlank()) {
+        if (finalSystem != null && !finalSystem.isBlank()) {
             com.hify.provider.dto.ChatMessage sys = new com.hify.provider.dto.ChatMessage();
             sys.setRole("system");
-            sys.setContent(systemPrompt);
+            sys.setContent(finalSystem);
             msgs.add(sys);
         }
         for (Map<String, String> ctx : contextMsgs) {
@@ -331,6 +350,28 @@ public class ChatServiceImpl implements ChatService {
         user.setContent(userContent);
         msgs.add(user);
         return msgs;
+    }
+
+    /**
+     * 拼接最终 system prompt。
+     * - 没有 RAG chunk：直接返回 Agent 原始 prompt
+     * - 有 RAG chunk：Agent prompt 保留，后面追加参考资料
+     */
+    private String buildSystemPrompt(String agentPrompt, List<ChunkVO> chunks) {
+        if (chunks == null || chunks.isEmpty()) {
+            return agentPrompt;
+        }
+        StringBuilder sb = new StringBuilder();
+        if (agentPrompt != null && !agentPrompt.isBlank()) {
+            sb.append(agentPrompt).append("\n\n");
+        }
+        sb.append("请基于以下参考资料回答用户问题。");
+        sb.append("如果资料中没有相关信息，直接说「我没有找到相关资料」，不要编造。\n\n");
+        sb.append("【参考资料】\n");
+        for (int i = 0; i < chunks.size(); i++) {
+            sb.append("[").append(i + 1).append("] ").append(chunks.get(i).getContent()).append("\n");
+        }
+        return sb.toString();
     }
 
     private String contextKey(Long sessionId) {

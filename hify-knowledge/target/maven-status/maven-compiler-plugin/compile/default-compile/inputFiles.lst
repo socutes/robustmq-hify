@@ -1,0 +1,12 @@
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/controller/KnowledgeController.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/dto/ChunkVO.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/dto/DocumentVO.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/dto/KnowledgeBaseCreateRequest.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/dto/KnowledgeBaseUpdateRequest.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/dto/KnowledgeBaseVO.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/entity/Document.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/entity/KnowledgeBase.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/mapper/DocumentMapper.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/mapper/KnowledgeBaseMapper.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/service/KnowledgeService.java
+/Users/oker/Desktop/hify/hify-knowledge/src/main/java/com/hify/knowledge/service/impl/KnowledgeServiceImpl.java

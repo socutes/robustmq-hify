@@ -1,0 +1,12 @@
+com/hify/knowledge/dto/KnowledgeBaseCreateRequest.class
+com/hify/knowledge/mapper/KnowledgeBaseMapper.class
+com/hify/knowledge/service/KnowledgeService.class
+com/hify/knowledge/dto/KnowledgeBaseUpdateRequest.class
+com/hify/knowledge/dto/DocumentVO.class
+com/hify/knowledge/entity/KnowledgeBase.class
+com/hify/knowledge/entity/Document.class
+com/hify/knowledge/controller/KnowledgeController.class
+com/hify/knowledge/dto/KnowledgeBaseVO.class
+com/hify/knowledge/mapper/DocumentMapper.class
+com/hify/knowledge/dto/ChunkVO.class
+com/hify/knowledge/service/impl/KnowledgeServiceImpl.class
