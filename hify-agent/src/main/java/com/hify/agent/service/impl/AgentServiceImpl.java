@@ -84,6 +84,7 @@ public class AgentServiceImpl implements AgentService {
         if (request.getMaxContextTurns() != null) agent.setMaxContextTurns(request.getMaxContextTurns());
         // knowledgeBaseId: 显式传 null 表示解除绑定，不传（字段不在 JSON 里）时不更新
         agent.setKnowledgeBaseId(request.getKnowledgeBaseId());
+        agent.setWorkflowId(request.getWorkflowId());
         agentMapper.updateById(agent);
 
         List<Long> toolIds = agentToolMapper.selectMcpServerIdsByAgentId(id);

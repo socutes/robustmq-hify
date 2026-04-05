@@ -40,6 +40,8 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     // Mock chunk 存储（替代 pgvector）
     private static final ConcurrentHashMap<Long, List<ChunkVO>> MOCK_CHUNKS = new ConcurrentHashMap<>();
+    // 暂存原始文件内容，processDocument 后清除
+    private static final ConcurrentHashMap<Long, String> DOC_RAW_TEXT = new ConcurrentHashMap<>();
     private static final List<String> ALLOWED_TYPES = Arrays.asList("txt", "md", "pdf");
     private static final long MAX_SIZE = 10 * 1024 * 1024L; // 10MB
 
@@ -122,14 +124,18 @@ public class KnowledgeServiceImpl implements KnowledgeService {
             throw new BizException(ErrorCode.PARAM_ERROR);
         }
 
-        // 保存文件到临时目录
-        String uploadDir = System.getProperty("java.io.tmpdir") + "/hify-uploads/";
-        new File(uploadDir).mkdirs();
+        // 读取文件内容（txt/md 直接读文本，pdf 降级为文件名占位）
+        String rawText = "";
         try {
-            file.transferTo(new File(uploadDir + System.currentTimeMillis() + "_" + originalName));
+            if ("txt".equals(ext) || "md".equals(ext)) {
+                rawText = new String(file.getBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            } else {
+                rawText = "[PDF 文件：" + originalName + "，Mock 模式暂不解析 PDF 内容]";
+            }
         } catch (IOException e) {
-            log.warn("文件保存失败，继续处理: {}", e.getMessage());
+            log.warn("读取文件内容失败: {}", e.getMessage());
         }
+        final String rawTextFinal = rawText;
 
         // 写 document 记录
         Document doc = new Document();
@@ -143,6 +149,9 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         documentMapper.insert(doc);
 
         Long docId = doc.getId();
+        if (!rawTextFinal.isBlank()) {
+            DOC_RAW_TEXT.put(docId, rawTextFinal);
+        }
         asyncExecutor.execute(() -> processDocument(docId));
 
         return DocumentVO.from(doc);
@@ -221,22 +230,35 @@ public class KnowledgeServiceImpl implements KnowledgeService {
             // step2: 模拟处理耗时
             Thread.sleep(2000 + new Random().nextInt(2000));
 
-            // step3: 生成 mock chunks
-            int chunkCount = 3 + new Random().nextInt(6);
+            // step3: 生成 chunks（优先用真实文件内容，按段落/换行切割）
+            String rawText = DOC_RAW_TEXT.remove(documentId);
             List<ChunkVO> chunks = new ArrayList<>();
-            for (int i = 0; i < chunkCount; i++) {
+            if (rawText != null && !rawText.isBlank()) {
+                // 按段落切割（连续空行）
+                String[] paragraphs = rawText.split("\\n{2,}");
+                for (int i = 0; i < paragraphs.length; i++) {
+                    String para = paragraphs[i].trim();
+                    if (para.isBlank()) continue;
+                    ChunkVO c = new ChunkVO();
+                    c.setId((long) (documentId * 1000 + i));
+                    c.setDocumentId(documentId);
+                    c.setChunkIndex(i);
+                    c.setContent(para);
+                    c.setTokenCount(para.length() / 2 + 1);
+                    chunks.add(c);
+                }
+            }
+            // 如果没有内容（如 PDF 占位），生成一条说明
+            if (chunks.isEmpty()) {
                 ChunkVO c = new ChunkVO();
-                c.setId((long) (documentId * 100 + i));
+                c.setId(documentId * 1000);
                 c.setDocumentId(documentId);
-                c.setChunkIndex(i);
-                c.setContent(String.format(
-                    "【%s】第 %d 段（Mock）：这是文档 \"%s\" 的第 %d 个文本分块。" +
-                    "在真实的 RAG 场景中，这里会是经过解析和切割的实际文档内容，" +
-                    "并附带 1536 维的 Embedding 向量存入 pgvector，供语义相似度检索使用。",
-                    doc.getName(), i + 1, doc.getName(), i + 1));
-                c.setTokenCount(80 + new Random().nextInt(120));
+                c.setChunkIndex(0);
+                c.setContent(String.format("【%s】（Mock 模式：文档内容未能解析）", doc.getName()));
+                c.setTokenCount(20);
                 chunks.add(c);
             }
+            int chunkCount = chunks.size();
             MOCK_CHUNKS.put(documentId, chunks);
 
             // step4: 更新状态

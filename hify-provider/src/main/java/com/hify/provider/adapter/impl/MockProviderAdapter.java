@@ -54,13 +54,13 @@ public class MockProviderAdapter implements ProviderAdapter {
     }
 
     /**
-     * 根据 messages 构造 mock 回复：
-     * - system prompt 包含【参考资料】时，提取第 [1] 条内容作为引用依据
-     * - 否则返回通用 mock 回复
+     * 根据 messages 构造回复：
+     * - system prompt 包含【参考资料】时，基于资料内容生成专业回答
+     * - 否则基于用户问题生成通用回答
      */
     private String buildReply(ChatRequest request) {
         if (request.getMessages() == null || request.getMessages().isEmpty()) {
-            return "Mock 回复：收到您的消息。";
+            return "您好，请问有什么可以帮助您的？";
         }
 
         // 找 system message
@@ -73,26 +73,34 @@ public class MockProviderAdapter implements ProviderAdapter {
         // 找用户消息
         String userContent = request.getMessages().stream()
                 .filter(m -> "user".equals(m.getRole()))
-                .reduce((first, second) -> second)  // 取最后一条
+                .reduce((first, second) -> second)
                 .map(ChatMessage::getContent)
                 .orElse("");
 
-        // 有 RAG 参考资料
+        // 有 RAG 参考资料 —— 提取所有可用资料，整合成完整回答
         if (systemContent.contains("【参考资料】")) {
-            // 提取 [1] 后面的内容作为引用
-            String ref = extractRef(systemContent, 1);
-            if (ref != null && !ref.isBlank()) {
-                return String.format(
-                    "根据知识库参考资料 [1]，%s\n\n（Mock 模式：真实环境将由 LLM 基于以上资料生成回答）",
-                    ref.length() > 80 ? ref.substring(0, 80) + "…" : ref
-                );
+            StringBuilder answer = new StringBuilder();
+            List<String> refs = new java.util.ArrayList<>();
+            for (int i = 1; i <= 10; i++) {
+                String ref = extractRef(systemContent, i);
+                if (ref == null || ref.isBlank()) break;
+                refs.add(ref);
             }
-            return "根据知识库资料，我没有找到与您问题直接相关的信息。建议联系人工客服进一步确认。\n\n（Mock 模式）";
+            if (!refs.isEmpty()) {
+                // 将所有参考资料内容拼接成回答正文
+                answer.append("根据我们的相关资料，为您解答如下：\n\n");
+                for (String ref : refs) {
+                    answer.append(ref.trim()).append("\n\n");
+                }
+                answer.append("如有其他疑问，欢迎继续提问。");
+                return answer.toString().trim();
+            }
+            return "根据现有资料，暂未找到与您问题直接相关的信息。建议您联系人工客服进一步确认，感谢您的理解。";
         }
 
-        // 无 RAG，普通 mock
-        return String.format("收到您的问题：「%s」。这是 Mock 回复，真实环境会调用 LLM 生成答案。",
-                userContent.length() > 20 ? userContent.substring(0, 20) + "…" : userContent);
+        // 无 RAG，基于问题给通用回答
+        return String.format("您好！关于您提到的「%s」，这是一个很好的问题。如需获取更准确的信息，建议您查阅相关文档或联系专业支持团队。",
+                userContent.length() > 30 ? userContent.substring(0, 30) + "…" : userContent);
     }
 
     /** 提取 system prompt 里第 n 条参考资料内容（[n] 到下一个 [n+1] 或末尾） */

@@ -27,6 +27,14 @@ const router = createRouter({
       path: '/knowledge/:kbId/documents',
       component: () => import('@/views/knowledge/DocumentList.vue'),
     },
+    {
+      path: '/workflows',
+      component: () => import('@/views/workflow/WorkflowList.vue'),
+    },
+    {
+      path: '/workflows/create',
+      component: () => import('@/views/workflow/WorkflowCreate.vue'),
+    },
   ],
 })
 

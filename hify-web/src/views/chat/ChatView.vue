@@ -49,6 +49,12 @@
         <!-- 顶栏 -->
         <div class="chat-topbar">
           <span class="chat-topbar-name">{{ agentNameMap[activeSession?.agentId ?? 0] ?? 'Agent' }}</span>
+          <el-tag v-if="activeAgentWorkflowId" size="small" type="warning" effect="light" style="margin-left:8px">
+            工作流模式
+          </el-tag>
+          <el-tag v-else size="small" type="info" effect="light" style="margin-left:8px">
+            直接对话
+          </el-tag>
         </div>
 
         <!-- 消息区域 -->
@@ -112,7 +118,15 @@
       <el-form label-width="80px">
         <el-form-item label="选择 Agent">
           <el-select v-model="newSessionAgentId" placeholder="请选择 Agent" style="width:100%">
-            <el-option v-for="a in agents" :key="a.id" :label="a.name" :value="a.id" />
+            <el-option v-for="a in agents" :key="a.id" :value="a.id">
+              <div style="display:flex;align-items:center;gap:8px;justify-content:space-between">
+                <span>{{ a.name }}</span>
+                <div style="display:flex;gap:4px">
+                  <el-tag v-if="a.workflowId" size="small" type="warning" effect="light">工作流</el-tag>
+                  <el-tag v-if="a.knowledgeBaseId" size="small" type="success" effect="light">知识库</el-tag>
+                </div>
+              </div>
+            </el-option>
           </el-select>
         </el-form-item>
       </el-form>
@@ -172,6 +186,12 @@ const agentNameMap = computed<Record<number, string>>(() => {
 })
 
 const activeSession = computed(() => sessions.value.find(s => s.id === activeSessionId.value))
+
+const activeAgentWorkflowId = computed(() => {
+  const agentId = activeSession.value?.agentId
+  if (!agentId) return null
+  return agents.value.find(a => a.id === agentId)?.workflowId ?? null
+})
 
 // ── 初始化 ────────────────────────────────────────────────
 onMounted(async () => {

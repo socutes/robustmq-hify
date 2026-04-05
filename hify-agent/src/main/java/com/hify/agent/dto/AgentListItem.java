@@ -16,6 +16,8 @@ public class AgentListItem {
     private BigDecimal temperature;
     private Integer enabled;
     private int toolCount;
+    private Long workflowId;
+    private Long knowledgeBaseId;
     private LocalDateTime createdAt;
 
     public static AgentListItem from(Agent agent, int toolCount) {
@@ -27,6 +29,8 @@ public class AgentListItem {
         item.setTemperature(agent.getTemperature());
         item.setEnabled(agent.getEnabled());
         item.setToolCount(toolCount);
+        item.setWorkflowId(agent.getWorkflowId());
+        item.setKnowledgeBaseId(agent.getKnowledgeBaseId());
         item.setCreatedAt(agent.getCreatedAt());
         return item;
     }

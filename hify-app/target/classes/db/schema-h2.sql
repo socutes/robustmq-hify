@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS agent (
     max_context_turns INT             NOT NULL DEFAULT 10,
     enabled             TINYINT         NOT NULL DEFAULT 1,
     knowledge_base_id   BIGINT          DEFAULT NULL,
+    workflow_id         BIGINT          DEFAULT NULL,
     deleted             TINYINT         NOT NULL DEFAULT 0,
     created_at          DATETIME        NOT NULL,
     updated_at          DATETIME        NOT NULL
@@ -106,6 +107,68 @@ CREATE TABLE IF NOT EXISTS document (
     deleted           TINYINT         NOT NULL DEFAULT 0,
     created_at        DATETIME        NOT NULL,
     updated_at        DATETIME        NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS workflow (
+    id          BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(100)    NOT NULL,
+    description VARCHAR(500)    DEFAULT '',
+    status      VARCHAR(20)     NOT NULL DEFAULT 'DRAFT',
+    deleted     TINYINT         NOT NULL DEFAULT 0,
+    created_at  DATETIME        NOT NULL,
+    updated_at  DATETIME        NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS workflow_node (
+    id           BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    workflow_id  BIGINT          NOT NULL,
+    node_key     VARCHAR(100)    NOT NULL,
+    type         VARCHAR(50)     NOT NULL,
+    name         VARCHAR(100)    NOT NULL DEFAULT '',
+    config       CLOB            DEFAULT '{}',
+    deleted      TINYINT         NOT NULL DEFAULT 0,
+    created_at   DATETIME        NOT NULL,
+    updated_at   DATETIME        NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS workflow_edge (
+    id              BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    workflow_id     BIGINT          NOT NULL,
+    source_node_key VARCHAR(100)    NOT NULL,
+    target_node_key VARCHAR(100)    NOT NULL,
+    condition_expr  VARCHAR(500)    DEFAULT NULL,
+    deleted         TINYINT         NOT NULL DEFAULT 0,
+    created_at      DATETIME        NOT NULL,
+    updated_at      DATETIME        NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS workflow_run (
+    id           BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    workflow_id  BIGINT       NOT NULL,
+    status       VARCHAR(20)  NOT NULL DEFAULT 'RUNNING',
+    input        CLOB,
+    output       CLOB,
+    error        VARCHAR(500),
+    elapsed_ms   INT,
+    finished_at  DATETIME,
+    deleted      TINYINT      NOT NULL DEFAULT 0,
+    created_at   DATETIME     NOT NULL,
+    updated_at   DATETIME     NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS workflow_node_run (
+    id              BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    workflow_run_id BIGINT       NOT NULL,
+    node_key        VARCHAR(100) NOT NULL,
+    node_type       VARCHAR(50)  NOT NULL,
+    status          VARCHAR(20)  NOT NULL DEFAULT 'RUNNING',
+    outputs         CLOB,
+    error           VARCHAR(500),
+    elapsed_ms      INT,
+    finished_at     DATETIME,
+    deleted         TINYINT      NOT NULL DEFAULT 0,
+    created_at      DATETIME     NOT NULL,
+    updated_at      DATETIME     NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS chat_message (

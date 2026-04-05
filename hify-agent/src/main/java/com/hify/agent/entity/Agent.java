@@ -31,4 +31,7 @@ public class Agent extends BaseEntity {
 
     /** 绑定的知识库 id，NULL 表示不启用 RAG */
     private Long knowledgeBaseId;
+
+    /** 绑定的工作流 id，NULL 表示不启用工作流 */
+    private Long workflowId;
 }

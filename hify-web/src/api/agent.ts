@@ -9,6 +9,8 @@ export interface AgentListItem {
   temperature: number
   enabled: number
   toolCount: number
+  workflowId?: number | null
+  knowledgeBaseId?: number | null
   createdAt: string
 }
 

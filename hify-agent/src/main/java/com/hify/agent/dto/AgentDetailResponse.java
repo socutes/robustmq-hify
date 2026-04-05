@@ -28,6 +28,9 @@ public class AgentDetailResponse {
     /** 绑定的知识库 id */
     private Long knowledgeBaseId;
 
+    /** 绑定的工作流 id */
+    private Long workflowId;
+
     public static AgentDetailResponse from(Agent agent, List<Long> toolIds) {
         AgentDetailResponse resp = new AgentDetailResponse();
         resp.setId(agent.getId());
@@ -40,6 +43,7 @@ public class AgentDetailResponse {
         resp.setMaxContextTurns(agent.getMaxContextTurns());
         resp.setEnabled(agent.getEnabled());
         resp.setKnowledgeBaseId(agent.getKnowledgeBaseId());
+        resp.setWorkflowId(agent.getWorkflowId());
         resp.setCreatedAt(agent.getCreatedAt());
         resp.setUpdatedAt(agent.getUpdatedAt());
         resp.setToolIds(toolIds);

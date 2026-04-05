@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { Setting, User, ChatDotRound, Folder, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import { Setting, User, ChatDotRound, Folder, Share, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const collapsed = ref(window.innerWidth < 1200)
@@ -87,11 +87,12 @@ const navItems = [
   { path: '/provider',   label: '模型管理',  icon: Setting },
   { path: '/agent',      label: 'Agent',    icon: User },
   { path: '/knowledge',  label: '知识库',   icon: Folder },
+  { path: '/workflows',  label: '工作流',   icon: Share },
   { path: '/chat',       label: '对话',     icon: ChatDotRound },
 ]
 
 const currentLabel = computed(() => {
-  const match = navItems.find(item => item.path === route.path)
+  const match = navItems.find(item => route.path === item.path || route.path.startsWith(item.path + '/'))
   return match ? match.label : ''
 })
 </script>

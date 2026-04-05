@@ -22,6 +22,24 @@
             <artifactId>hify-common</artifactId>
         </dependency>
 
+        <!-- hify-provider (LLM 调用) -->
+        <dependency>
+            <groupId>com.hify</groupId>
+            <artifactId>hify-provider</artifactId>
+        </dependency>
+
+        <!-- hify-knowledge (RAG 检索) -->
+        <dependency>
+            <groupId>com.hify</groupId>
+            <artifactId>hify-knowledge</artifactId>
+        </dependency>
+
+        <!-- OkHttp (API_CALL 节点) -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+
         <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

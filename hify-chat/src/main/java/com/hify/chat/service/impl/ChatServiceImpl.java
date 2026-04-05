@@ -18,6 +18,7 @@ import com.hify.common.exception.BizException;
 import com.hify.common.exception.ErrorCode;
 import com.hify.knowledge.dto.ChunkVO;
 import com.hify.knowledge.service.KnowledgeService;
+import com.hify.workflow.engine.WorkflowEngine;
 import com.hify.provider.adapter.ProviderAdapter;
 import com.hify.provider.adapter.ProviderAdapterFactory;
 import com.hify.provider.dto.ChatRequest;
@@ -57,6 +58,8 @@ public class ChatServiceImpl implements ChatService {
 
     @Qualifier("llmExecutor")
     private final Executor llmExecutor;
+
+    private final WorkflowEngine workflowEngine;
 
     // Redis is optional — null in mock profile
     private final Optional<RedisUtil> redisUtil;
@@ -144,6 +147,27 @@ public class ChatServiceImpl implements ChatService {
         Agent agent = agentMapper.selectById(session.getAgentId());
         if (agent == null) {
             throw new BizException(ErrorCode.AGENT_NOT_FOUND);
+        }
+
+        // 2.5 如果 Agent 绑了工作流，走工作流引擎，不走直接 LLM 路径
+        if (agent.getWorkflowId() != null) {
+            saveMessage(sessionId, "user", userContent, null, null, null);
+            try {
+                String wfOutput = workflowEngine.execute(agent.getWorkflowId(), userContent);
+                // 流式模拟：按字推送工作流输出
+                for (String ch : wfOutput.split("")) {
+                    String event = objectMapper.writeValueAsString(Map.of("type", "delta", "content", ch));
+                    emitter.send(SseEmitter.event().data(event));
+                }
+                saveMessage(sessionId, "assistant", wfOutput, null, "stop", null);
+                String doneEvent = objectMapper.writeValueAsString(Map.of("type", "done", "finishReason", "stop", "latencyMs", 0));
+                emitter.send(SseEmitter.event().data(doneEvent));
+            } catch (BizException e) {
+                String errEvent = objectMapper.writeValueAsString(Map.of("type", "error", "message", e.getMessage()));
+                emitter.send(SseEmitter.event().data(errEvent));
+            }
+            emitter.complete();
+            return;
         }
 
         // 3. Load ModelConfig
