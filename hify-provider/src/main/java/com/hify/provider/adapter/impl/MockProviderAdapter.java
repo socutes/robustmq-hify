@@ -38,12 +38,40 @@ public class MockProviderAdapter implements ProviderAdapter {
 
     @Override
     public ChatResponse chat(Provider provider, ChatRequest request) {
+        // 有 tools 且用户问题匹配 → 模拟 tool_calls
+        if (request.getTools() != null && !request.getTools().isEmpty()) {
+            String userMsg = lastUserMessage(request);
+            String matchedTool = matchTool(request.getTools(), userMsg);
+            if (matchedTool != null) {
+                ChatResponse resp = new ChatResponse();
+                resp.setFinishReason("tool_calls");
+                resp.setContent(null);
+                resp.setToolCalls(List.of(ChatResponse.ToolCall.of(
+                        "call_mock_001", matchedTool,
+                        buildMockArgs(matchedTool, userMsg))));
+                return resp;
+            }
+        }
         String reply = buildReply(request);
         return ChatResponse.of(reply, "stop", reply.length() / 2);
     }
 
     @Override
     public ChatResponse streamChat(Provider provider, ChatRequest request, Consumer<String> onChunk) {
+        // 有 tools 且匹配 → 模拟 tool_calls（不流式推送，直接返回）
+        if (request.getTools() != null && !request.getTools().isEmpty()) {
+            String userMsg = lastUserMessage(request);
+            String matchedTool = matchTool(request.getTools(), userMsg);
+            if (matchedTool != null) {
+                ChatResponse resp = new ChatResponse();
+                resp.setFinishReason("tool_calls");
+                resp.setContent(null);
+                resp.setToolCalls(List.of(ChatResponse.ToolCall.of(
+                        "call_mock_001", matchedTool,
+                        buildMockArgs(matchedTool, userMsg))));
+                return resp;
+            }
+        }
         String reply = buildReply(request);
         // 按字符逐个推送，模拟流式
         for (String ch : reply.split("")) {
@@ -101,6 +129,49 @@ public class MockProviderAdapter implements ProviderAdapter {
         // 无 RAG，基于问题给通用回答
         return String.format("您好！关于您提到的「%s」，这是一个很好的问题。如需获取更准确的信息，建议您查阅相关文档或联系专业支持团队。",
                 userContent.length() > 30 ? userContent.substring(0, 30) + "…" : userContent);
+    }
+
+    /** 取最后一条 user 消息内容 */
+    private String lastUserMessage(ChatRequest request) {
+        if (request.getMessages() == null) return "";
+        return request.getMessages().stream()
+                .filter(m -> "user".equals(m.getRole()))
+                .reduce((a, b) -> b)
+                .map(ChatMessage::getContent)
+                .orElse("");
+    }
+
+    /**
+     * 判断用户消息是否匹配某个工具，返回工具名，无匹配返回 null。
+     * 匹配逻辑：工具 description 里的关键词出现在用户消息里。
+     */
+    @SuppressWarnings("unchecked")
+    private String matchTool(List<java.util.Map<String, Object>> tools, String userMsg) {
+        if (userMsg == null || userMsg.isBlank()) return null;
+        String lower = userMsg.toLowerCase();
+        // 关键词触发：只要问题包含"订单"、"物流"、"快递"、"库存"、"工单"等就触发第一个工具
+        boolean hasQueryKeyword = lower.contains("订单") || lower.contains("物流")
+                || lower.contains("快递") || lower.contains("库存")
+                || lower.contains("工单") || lower.contains("查")
+                || lower.contains("到哪") || lower.contains("状态");
+        if (!hasQueryKeyword) return null;
+        // 返回第一个 tools 列表里的工具名
+        for (java.util.Map<String, Object> tool : tools) {
+            Object fn = tool.get("function");
+            if (fn instanceof java.util.Map) {
+                Object name = ((java.util.Map<String, Object>) fn).get("name");
+                if (name != null) return name.toString();
+            }
+        }
+        return null;
+    }
+
+    /** 根据工具名构建 mock 参数 JSON 字符串 */
+    private String buildMockArgs(String toolName, String userMsg) {
+        // 从用户消息里尝试提取数字作为 orderId
+        String orderId = userMsg.replaceAll("[^0-9]", "");
+        if (orderId.isBlank()) orderId = "MOCK-001";
+        return String.format("{\"orderId\":\"%s\",\"userId\":\"mock-user\"}", orderId);
     }
 
     /** 提取 system prompt 里第 n 条参考资料内容（[n] 到下一个 [n+1] 或末尾） */

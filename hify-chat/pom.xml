@@ -46,6 +46,12 @@
             <artifactId>hify-knowledge</artifactId>
         </dependency>
 
+        <!-- hify-mcp (tool calling) -->
+        <dependency>
+            <groupId>com.hify</groupId>
+            <artifactId>hify-mcp</artifactId>
+        </dependency>
+
         <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

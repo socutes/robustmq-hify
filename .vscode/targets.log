@@ -10,7 +10,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 make: *** No rule to make target `all'.  Stop.
 
 
-# Make data base, printed on Sun Apr  5 11:48:53 2026
+# Make data base, printed on Sun Apr  5 20:21:57 2026
 
 # Variables
 
@@ -32,6 +32,7 @@ VSCEXT_TRUSTIFY_DA_PIP_PATH = pip
 VSCEXT_TRUSTIFY_DA_PNPM_PATH = pnpm
 # environment
 COPILOT_OTEL_ENABLED = true
+ 
 # automatic
 @D = $(patsubst %/,%,$(dir $@))
 # automatic
@@ -61,7 +62,6 @@ INFOPATH = /opt/homebrew/share/info:
 # environment
 VSCEXT_TRUSTIFY_DA_SKOPEO_PATH = skopeo
 # environment
- 
 USER = oker
 # environment
 VSCODE_CWD = /
@@ -390,6 +390,6 @@ clean:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sun Apr  5 11:48:53 2026
+# Finished Make data base on Sun Apr  5 20:21:57 2026
 
  

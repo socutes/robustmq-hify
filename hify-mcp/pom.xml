@@ -52,6 +52,13 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- MCP Java SDK - 官方协议层，只做序列化/反序列化和请求响应 -->
+        <dependency>
+            <groupId>io.modelcontextprotocol.sdk</groupId>
+            <artifactId>mcp</artifactId>
+            <version>1.1.1</version>
+        </dependency>
     </dependencies>
 
 </project>

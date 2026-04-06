@@ -27,6 +27,28 @@ public class ChatResponse {
         return r;
     }
 
+    /**
+     * tool_calls：当 finishReason = "tool_calls" 时非空。
+     * 每个元素结构：{ id, name, arguments (JSON string) }
+     */
+    private java.util.List<ToolCall> toolCalls;
+
+    @lombok.Data
+    public static class ToolCall {
+        private String id;
+        private String name;
+        /** arguments JSON 字符串，如 {"orderId":"12345"} */
+        private String arguments;
+
+        public static ToolCall of(String id, String name, String arguments) {
+            ToolCall tc = new ToolCall();
+            tc.id = id;
+            tc.name = name;
+            tc.arguments = arguments;
+            return tc;
+        }
+    }
+
     public static ChatResponse error(String message) {
         ChatResponse r = new ChatResponse();
         r.setContent("");

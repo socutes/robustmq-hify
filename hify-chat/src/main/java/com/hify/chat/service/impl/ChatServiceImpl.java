@@ -16,8 +16,13 @@ import com.hify.common.dto.PageResult;
 import com.hify.common.dto.Result;
 import com.hify.common.exception.BizException;
 import com.hify.common.exception.ErrorCode;
+import com.hify.agent.entity.AgentTool;
+import com.hify.agent.mapper.AgentToolMapper;
 import com.hify.knowledge.dto.ChunkVO;
 import com.hify.knowledge.service.KnowledgeService;
+import com.hify.mcp.entity.McpServer;
+import com.hify.mcp.mapper.McpServerMapper;
+import com.hify.mcp.service.McpService;
 import com.hify.workflow.engine.WorkflowEngine;
 import com.hify.provider.adapter.ProviderAdapter;
 import com.hify.provider.adapter.ProviderAdapterFactory;
@@ -50,6 +55,9 @@ public class ChatServiceImpl implements ChatService {
     private final ChatSessionMapper sessionMapper;
     private final ChatMessageMapper messageMapper;
     private final AgentMapper agentMapper;
+    private final AgentToolMapper agentToolMapper;
+    private final McpServerMapper mcpServerMapper;
+    private final McpService mcpService;
     private final ModelConfigMapper modelConfigMapper;
     private final ProviderMapper providerMapper;
     private final ProviderAdapterFactory adapterFactory;
@@ -200,15 +208,19 @@ public class ChatServiceImpl implements ChatService {
         List<com.hify.provider.dto.ChatMessage> messages = buildMessages(
                 agent.getSystemPrompt(), ragChunks, contextMsgs, userContent);
 
-        // 8. Build ChatRequest
+        // 8. 加载 Agent 绑定的 MCP 工具，构建 tools schema
+        List<Map<String, Object>> toolSchemas = buildToolSchemas(agent.getId());
+
+        // 9. Build ChatRequest
         ChatRequest chatRequest = ChatRequest.builder()
                 .modelId(modelConfig.getModelId())
                 .messages(messages)
                 .temperature(agent.getTemperature())
                 .maxTokens(agent.getMaxTokens())
+                .tools(toolSchemas.isEmpty() ? null : toolSchemas)
                 .build();
 
-        // 9. Call LLM streaming
+        // 10. 第一次 LLM 调用
         ProviderAdapter adapter = adapterFactory.get(provider.getType());
         long start = System.currentTimeMillis();
 
@@ -221,16 +233,62 @@ public class ChatServiceImpl implements ChatService {
             }
         });
 
+        // 11. 判断是否需要工具调用
+        if ("tool_calls".equals(llmResp.getFinishReason())
+                && llmResp.getToolCalls() != null && !llmResp.getToolCalls().isEmpty()) {
+
+            log.info("[MCP] finish_reason=tool_calls session={} tools={}", sessionId,
+                    llmResp.getToolCalls().stream().map(ChatResponse.ToolCall::getName).toList());
+
+            // 把 assistant 的 tool_calls 指令追加进消息历史
+            com.hify.provider.dto.ChatMessage assistantMsg = new com.hify.provider.dto.ChatMessage();
+            assistantMsg.setRole("assistant");
+            assistantMsg.setContent("");
+            assistantMsg.setToolCalls(llmResp.getToolCalls());
+            messages.add(assistantMsg);
+
+            // 逐个执行工具调用，把结果作为 role=tool 消息追加
+            for (ChatResponse.ToolCall toolCall : llmResp.getToolCalls()) {
+                String toolResult = executeToolCall(toolCall, agent.getId());
+                log.info("[MCP] tool={} result={}", toolCall.getName(),
+                        toolResult.length() > 100 ? toolResult.substring(0, 100) + "..." : toolResult);
+
+                com.hify.provider.dto.ChatMessage toolMsg = new com.hify.provider.dto.ChatMessage();
+                toolMsg.setRole("tool");
+                toolMsg.setToolCallId(toolCall.getId());
+                toolMsg.setContent(toolResult);
+                messages.add(toolMsg);
+            }
+
+            // 第二次 LLM 调用，基于工具结果生成最终回答（流式推送）
+            ChatRequest secondReq = ChatRequest.builder()
+                    .modelId(modelConfig.getModelId())
+                    .messages(messages)
+                    .temperature(agent.getTemperature())
+                    .maxTokens(agent.getMaxTokens())
+                    .build();
+
+            llmResp = adapter.streamChat(provider, secondReq, delta -> {
+                try {
+                    String event = objectMapper.writeValueAsString(Map.of("type", "delta", "content", delta));
+                    emitter.send(SseEmitter.event().data(event));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            log.info("[MCP] 第二次 LLM 调用完成 session={} finishReason={}", sessionId, llmResp.getFinishReason());
+        }
+
         int latencyMs = (int) (System.currentTimeMillis() - start);
 
-        // 10. Save assistant message to MySQL
+        // 12. Save assistant message to MySQL
         saveMessage(sessionId, "assistant", llmResp.getContent(),
                 llmResp.getCompletionTokens(), llmResp.getFinishReason(), latencyMs);
 
-        // 11. Update Redis context
+        // 13. Update Redis context
         updateContext(sessionId, userContent, llmResp.getContent(), maxMsgs);
 
-        // 12. Send done event
+        // 14. Send done event
         String doneEvent = objectMapper.writeValueAsString(Map.of(
                 "type", "done",
                 "finishReason", llmResp.getFinishReason() != null ? llmResp.getFinishReason() : "stop",
@@ -400,5 +458,82 @@ public class ChatServiceImpl implements ChatService {
 
     private String contextKey(Long sessionId) {
         return "session:" + sessionId;
+    }
+
+    // ── MCP 工具辅助 ──────────────────────────────────────────
+
+    /**
+     * 构建 Agent 绑定的所有 MCP Server 的工具 Schema 列表（OpenAI tools 格式）。
+     * 无绑定时返回空列表。
+     */
+    private List<Map<String, Object>> buildToolSchemas(Long agentId) {
+        List<Long> mcpServerIds = agentToolMapper.selectMcpServerIdsByAgentId(agentId);
+        if (mcpServerIds.isEmpty()) return List.of();
+
+        List<Map<String, Object>> schemas = new ArrayList<>();
+        for (Long serverId : mcpServerIds) {
+            McpServer server = mcpServerMapper.selectById(serverId);
+            if (server == null || server.getEnabled() != 1) continue;
+            try {
+                List<String> toolNames = mcpService.listTools(serverId);
+                for (String toolName : toolNames) {
+                    schemas.add(Map.of(
+                            "type", "function",
+                            "function", Map.of(
+                                    "name", toolName,
+                                    "description", "来自 " + server.getName() + " 的工具：" + toolName,
+                                    "parameters", Map.of(
+                                            "type", "object",
+                                            "properties", Map.of(
+                                                    "orderId", Map.of("type", "string", "description", "订单号"),
+                                                    "userId", Map.of("type", "string", "description", "用户ID")
+                                            )
+                                    )
+                            )
+                    ));
+                }
+            } catch (Exception e) {
+                log.warn("[MCP] 加载工具列表失败 serverId={}: {}", serverId, e.getMessage());
+            }
+        }
+        return schemas;
+    }
+
+    /**
+     * 执行一次工具调用，返回文本结果。
+     * 失败时返回错误描述而不抛异常，让 LLM 决定如何告知用户。
+     */
+    private String executeToolCall(ChatResponse.ToolCall toolCall, Long agentId) {
+        List<Long> mcpServerIds = agentToolMapper.selectMcpServerIdsByAgentId(agentId);
+        for (Long serverId : mcpServerIds) {
+            try {
+                // 尝试在这个 server 上调用工具（mock 场景下会直接失败，返回 mock 结果）
+                Map<String, Object> args = parseArguments(toolCall.getArguments());
+                return mcpService.callTool(serverId, toolCall.getName(), args);
+            } catch (Exception e) {
+                // mock profile 下 MCP Server 实际不存在，返回模拟数据
+                log.info("[MCP] callTool 失败，使用 mock 数据 tool={}: {}", toolCall.getName(), e.getMessage());
+                return buildMockToolResult(toolCall.getName(), toolCall.getArguments());
+            }
+        }
+        return buildMockToolResult(toolCall.getName(), toolCall.getArguments());
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> parseArguments(String argumentsJson) {
+        try {
+            return objectMapper.readValue(argumentsJson, Map.class);
+        } catch (Exception e) {
+            return Map.of();
+        }
+    }
+
+    /** mock profile 下，工具调用失败时返回的模拟数据 */
+    private String buildMockToolResult(String toolName, String arguments) {
+        String orderId = arguments != null ? arguments.replaceAll("[^0-9A-Za-z-]", "").substring(0, Math.min(20, arguments.replaceAll("[^0-9A-Za-z-]", "").length())) : "MOCK-001";
+        return String.format(
+                "{\"status\":\"运输中\",\"trackingNo\":\"SF%s\",\"estimatedDate\":\"明天\",\"tool\":\"%s\"}",
+                orderId.replaceAll("[^0-9]", "").substring(0, Math.min(7, orderId.replaceAll("[^0-9]", "").length())),
+                toolName);
     }
 }

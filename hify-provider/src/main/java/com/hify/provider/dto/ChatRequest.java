@@ -28,4 +28,11 @@ public class ChatRequest {
     /** 是否流式，ChatService 调用 streamChat 时始终为 true */
     @Builder.Default
     private boolean stream = false;
+
+    /**
+     * 可用工具列表（Function Calling）。
+     * 每个元素是工具的 JSON Schema 描述，按 OpenAI tools 格式。
+     * 为 null 或空时不启用 Function Calling。
+     */
+    private List<java.util.Map<String, Object>> tools;
 }

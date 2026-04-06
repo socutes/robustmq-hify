@@ -1,5 +1,1 @@
 make --dry-run --always-make --keep-going --print-directory
-make: Entering directory `/Users/oker/Desktop/hify'
-bash /Users/oker/Desktop/hify/start.sh
-make: Leaving directory `/Users/oker/Desktop/hify'
- 

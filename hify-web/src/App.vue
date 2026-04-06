@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { Setting, User, ChatDotRound, Folder, Share, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import { Setting, User, ChatDotRound, Folder, Share, Connection, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const collapsed = ref(window.innerWidth < 1200)
@@ -88,6 +88,7 @@ const navItems = [
   { path: '/agent',      label: 'Agent',    icon: User },
   { path: '/knowledge',  label: '知识库',   icon: Folder },
   { path: '/workflows',  label: '工作流',   icon: Share },
+  { path: '/mcp',        label: 'MCP 工具', icon: Connection },
   { path: '/chat',       label: '对话',     icon: ChatDotRound },
 ]
 
