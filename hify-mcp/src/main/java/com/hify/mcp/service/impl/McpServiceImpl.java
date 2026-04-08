@@ -135,14 +135,16 @@ public class McpServiceImpl implements McpService {
         McpServer server = getOrThrow(mcpServerId);
         var transport = HttpClientSseClientTransport.builder(server.getEndpoint()).build();
         try (McpSyncClient client = McpClient.sync(transport)
-                .requestTimeout(Duration.ofSeconds(10))
+                .requestTimeout(Duration.ofSeconds(5))
                 .build()) {
             client.initialize();
             return client.listTools().tools().stream()
                     .map(this::toToolDetail)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new BizException(ErrorCode.MCP_SERVER_NOT_FOUND, "无法连接 MCP Server: " + e.getMessage());
+            log.warn("MCP listToolsDetail failed server={}: {}", server.getName(), e.getMessage());
+            // 连不上时返回空列表，不抛异常，由前端决定如何提示
+            return java.util.Collections.emptyList();
         }
     }
 
@@ -187,7 +189,7 @@ public class McpServiceImpl implements McpService {
     private List<String> listToolsFromEndpoint(String endpoint) {
         var transport = HttpClientSseClientTransport.builder(endpoint).build();
         try (McpSyncClient client = McpClient.sync(transport)
-                .requestTimeout(Duration.ofSeconds(10))
+                .requestTimeout(Duration.ofSeconds(5))
                 .build()) {
             client.initialize();
             return client.listTools().tools().stream()

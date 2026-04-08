@@ -10,7 +10,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 make: *** No rule to make target `all'.  Stop.
 
 
-# Make data base, printed on Sun Apr  5 20:21:57 2026
+# Make data base, printed on Mon Apr  6 22:12:50 2026
 
 # Variables
 
@@ -18,6 +18,8 @@ make: *** No rule to make target `all'.  Stop.
 <D = $(patsubst %/,%,$(dir $<))
 # automatic
 ?F = $(notdir $?)
+# environment
+NODE_TLS_REJECT_UNAUTHORIZED = 0
 # environment
 VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
 # environment
@@ -32,12 +34,12 @@ VSCEXT_TRUSTIFY_DA_PIP_PATH = pip
 VSCEXT_TRUSTIFY_DA_PNPM_PATH = pnpm
 # environment
 COPILOT_OTEL_ENABLED = true
- 
 # automatic
 @D = $(patsubst %/,%,$(dir $@))
 # automatic
 @F = $(notdir $@)
 # makefile
+ 
 CURDIR := /Users/oker/Desktop/hify
 # environment
 VSCEXT_MATCH_MANIFEST_VERSIONS = true
@@ -46,11 +48,13 @@ SHELL = /bin/sh
 # makefile (from `Makefile', line 1)
 ROOT_DIR := /Users/oker/Desktop/hify
 # environment
-VSCODE_NLS_CONFIG = {"userLocale":"zh-cn","osLocale":"zh-cn","resolvedLanguage":"zh-cn","defaultMessagesFile":"/Users/oker/Desktop/Visual Studio Code.app/Contents/Resources/app/out/nls.messages.json","languagePack":{"translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/ca2f903cb9e726ed3d7fd7f74444fb8d.zh-cn/tcf.json","messagesFile":"/Users/oker/Library/Application Support/Code/clp/ca2f903cb9e726ed3d7fd7f74444fb8d.zh-cn/e7fb5e96c0730b9deb70b33781f98e2f35975036/nls.messages.json","corruptMarkerFile":"/Users/oker/Library/Application Support/Code/clp/ca2f903cb9e726ed3d7fd7f74444fb8d.zh-cn/corrupted.info"},"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"ca2f903cb9e726ed3d7fd7f74444fb8d.zh-cn","_languagePackSupport":true,"_translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/ca2f903cb9e726ed3d7fd7f74444fb8d.zh-cn/tcf.json","_cacheRoot":"/Users/oker/Library/Application Support/Code/clp/ca2f903cb9e726ed3d7fd7f74444fb8d.zh-cn","_resolvedLanguagePackCoreLocation":"/Users/oker/Library/Application Support/Code/clp/ca2f903cb9e726ed3d7fd7f74444fb8d.zh-cn/e7fb5e96c0730b9deb70b33781f98e2f35975036","_corruptedFile":"/Users/oker/Library/Application Support/Code/clp/ca2f903cb9e726ed3d7fd7f74444fb8d.zh-cn/corrupted.info"}
+VSCODE_NLS_CONFIG = {"userLocale":"zh-cn","osLocale":"zh-cn","resolvedLanguage":"zh-cn","defaultMessagesFile":"/Users/oker/Desktop/Visual Studio Code.app/Contents/Resources/app/out/nls.messages.json","languagePack":{"translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/tcf.json","messagesFile":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/e7fb5e96c0730b9deb70b33781f98e2f35975036/nls.messages.json","corruptMarkerFile":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/corrupted.info"},"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"9f249a5199ee038ca4a1295a328897d2.zh-cn","_languagePackSupport":true,"_translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/tcf.json","_cacheRoot":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn","_resolvedLanguagePackCoreLocation":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/e7fb5e96c0730b9deb70b33781f98e2f35975036","_corruptedFile":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/corrupted.info"}
 # environment
 _ = /usr/bin/make
 # environment
 COPILOT_OTEL_EXPORTER_TYPE = file
+# environment
+VSCODE_PID = 47745
 # makefile (from `Makefile', line 1)
 MAKEFILE_LIST :=  Makefile
 # makefile (from `Makefile', line 2)
@@ -114,7 +118,7 @@ VSCEXT_TRUSTIFY_DA_BACKEND_URL = https://rhda.rhcloud.com
 # environment
 LOGNAME = oker
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
 VSCEXT_USE_PIP_DEP_TREE = false
 # environment
@@ -191,6 +195,8 @@ XPC_SERVICE_NAME = application.com.microsoft.VSCode.200799537.200799543
 HOMEBREW_PREFIX = /opt/homebrew
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
+# environment
+VSCODE_L10N_BUNDLE_LOCATION = file:///Users/oker/.vscode/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.110.2026040511/translations/extensions/vscode.json-language-features.i18n.json
 # automatic
 +F = $(notdir $+)
 # environment
@@ -234,11 +240,11 @@ VSCEXT_TRUSTIFY_DA_NPM_PATH = npm
 # environment
 LANG = C
 # environment
-VSCODE_PID = 70227
+APPLICATIONINSIGHTS_CONFIGURATION_CONTENT = {}
 # environment
 VSCEXT_TRUSTIFY_DA_PYTHON3_PATH = python3
 # variable set hash-table stats:
-# Load=111/1024=11%, Rehash=0, Collisions=7/141=5%
+# Load=114/1024=11%, Rehash=0, Collisions=8/144=6%
 
 # Pattern-specific Variable Values
 
@@ -390,6 +396,6 @@ clean:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sun Apr  5 20:21:57 2026
+# Finished Make data base on Mon Apr  6 22:12:50 2026
 
  

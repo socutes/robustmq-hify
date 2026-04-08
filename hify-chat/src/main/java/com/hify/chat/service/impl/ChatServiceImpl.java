@@ -476,12 +476,17 @@ public class ChatServiceImpl implements ChatService {
             if (server == null || server.getEnabled() != 1) continue;
             try {
                 List<String> toolNames = mcpService.listTools(serverId);
+                if (toolNames.isEmpty()) {
+                    // 连不上时 fallback：使用 server 名称推断工具列表
+                    toolNames = buildFallbackToolNames(server.getName());
+                    log.info("[MCP] Server {} 无法连接，使用 fallback 工具列表: {}", server.getName(), toolNames);
+                }
                 for (String toolName : toolNames) {
                     schemas.add(Map.of(
                             "type", "function",
                             "function", Map.of(
                                     "name", toolName,
-                                    "description", "来自 " + server.getName() + " 的工具：" + toolName,
+                                    "description", buildToolDescription(toolName, server.getName()),
                                     "parameters", Map.of(
                                             "type", "object",
                                             "properties", Map.of(
@@ -494,6 +499,24 @@ public class ChatServiceImpl implements ChatService {
                 }
             } catch (Exception e) {
                 log.warn("[MCP] 加载工具列表失败 serverId={}: {}", serverId, e.getMessage());
+                // fallback 工具列表
+                List<String> fallback = buildFallbackToolNames(server.getName());
+                for (String toolName : fallback) {
+                    schemas.add(Map.of(
+                            "type", "function",
+                            "function", Map.of(
+                                    "name", toolName,
+                                    "description", buildToolDescription(toolName, server.getName()),
+                                    "parameters", Map.of(
+                                            "type", "object",
+                                            "properties", Map.of(
+                                                    "orderId", Map.of("type", "string", "description", "订单号"),
+                                                    "userId", Map.of("type", "string", "description", "用户ID")
+                                            )
+                                    )
+                            )
+                    ));
+                }
             }
         }
         return schemas;
@@ -528,12 +551,55 @@ public class ChatServiceImpl implements ChatService {
         }
     }
 
-    /** mock profile 下，工具调用失败时返回的模拟数据 */
+    /** 根据 server 名称推断工具列表（MCP Server 连不上时的 fallback） */
+    private List<String> buildFallbackToolNames(String serverName) {
+        if (serverName != null && (serverName.contains("退款") || serverName.contains("refund"))) {
+            return List.of("check_refund_eligibility", "submit_refund", "get_refund_status", "cancel_refund");
+        }
+        if (serverName != null && (serverName.contains("订单") || serverName.contains("order"))) {
+            return List.of("query_order", "cancel_order");
+        }
+        if (serverName != null && (serverName.contains("物流") || serverName.contains("logistics"))) {
+            return List.of("track_logistics");
+        }
+        return List.of();
+    }
+
+    /** 根据工具名生成 description */
+    private String buildToolDescription(String toolName, String serverName) {
+        return switch (toolName) {
+            case "check_refund_eligibility" -> "查询订单是否满足退款条件";
+            case "submit_refund"            -> "提交退款申请";
+            case "get_refund_status"        -> "查询退款进度和状态";
+            case "cancel_refund"            -> "取消退款申请";
+            case "query_order"              -> "查询订单详情";
+            case "cancel_order"             -> "取消订单";
+            case "track_logistics"          -> "查询物流轨迹";
+            default -> "来自 " + serverName + " 的工具：" + toolName;
+        };
+    }
+
+    /** mock profile 下，工具调用失败时返回的模拟数据（按工具名区分） */
     private String buildMockToolResult(String toolName, String arguments) {
-        String orderId = arguments != null ? arguments.replaceAll("[^0-9A-Za-z-]", "").substring(0, Math.min(20, arguments.replaceAll("[^0-9A-Za-z-]", "").length())) : "MOCK-001";
-        return String.format(
-                "{\"status\":\"运输中\",\"trackingNo\":\"SF%s\",\"estimatedDate\":\"明天\",\"tool\":\"%s\"}",
-                orderId.replaceAll("[^0-9]", "").substring(0, Math.min(7, orderId.replaceAll("[^0-9]", "").length())),
-                toolName);
+        return switch (toolName) {
+            case "check_refund_eligibility" ->
+                "{\"eligible\":true,\"orderId\":\"20240501001\",\"orderAmount\":299.00," +
+                "\"payTime\":\"2026-04-01 14:22:10\",\"productName\":\"无线蓝牙耳机\"," +
+                "\"reason\":\"商品在7天无理由退货期内，可以申请退款\"}";
+            case "submit_refund" ->
+                "{\"success\":true,\"refundId\":\"RF20260408001\",\"orderId\":\"20240501001\"," +
+                "\"refundAmount\":299.00,\"status\":\"审核中\"," +
+                "\"estimatedTime\":\"1-3个工作日内退回原支付账户\"}";
+            case "get_refund_status" ->
+                "{\"refundId\":\"RF20260408001\",\"orderId\":\"20240501001\"," +
+                "\"status\":\"已退款\",\"refundAmount\":299.00," +
+                "\"refundTime\":\"2026-04-08 16:30:00\",\"bankAccount\":\"尾号6379\"}";
+            case "cancel_refund" ->
+                "{\"success\":true,\"refundId\":\"RF20260408001\"," +
+                "\"message\":\"退款申请已成功取消，订单恢复正常状态\"}";
+            default ->
+                "{\"status\":\"运输中\",\"trackingNo\":\"SF1234567\"," +
+                "\"estimatedDate\":\"明天\",\"tool\":\"" + toolName + "\"}";
+        };
     }
 }
