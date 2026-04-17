@@ -1,8 +1,10 @@
 package com.hify.common.metrics;
 
 import io.micrometer.core.instrument.*;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -20,6 +22,48 @@ public class HifyMetrics {
 
     public HifyMetrics(MeterRegistry registry) {
         this.registry = registry;
+    }
+
+    /** 启动时预注册所有指标，确保 Prometheus 抓取时有初始值 */
+    @PostConstruct
+    public void initMetrics() {
+        // 对话指标（用 unknown 占位，真实 agentId 首次请求后覆盖）
+        List.of("unknown").forEach(agentId -> {
+            Counter.builder("hify_chat_requests_total")
+                    .tag("agent_id", agentId).description("Total chat requests")
+                    .register(registry);
+            DistributionSummary.builder("hify_chat_duration_ms")
+                    .tag("agent_id", agentId).description("Chat request duration in milliseconds")
+                    .publishPercentileHistogram(true).register(registry);
+        });
+
+        // LLM 指标
+        List.of("OPENAI", "ANTHROPIC", "OLLAMA").forEach(provider -> {
+            List.of("gpt-4o", "claude-3-5-sonnet", "llama3").forEach(model -> {
+                List.of("true", "false").forEach(success -> {
+                    Counter.builder("hify_llm_calls_total")
+                            .tag("provider", provider).tag("model", model).tag("success", success)
+                            .description("Total LLM API calls").register(registry);
+                });
+                DistributionSummary.builder("hify_llm_duration_ms")
+                        .tag("provider", provider).tag("model", model)
+                        .description("LLM API call duration in milliseconds")
+                        .publishPercentileHistogram(true).register(registry);
+            });
+        });
+
+        // 熔断器状态（各 provider 初始为 CLOSED=0）
+        List.of("OPENAI", "ANTHROPIC", "OLLAMA").forEach(p -> circuitBreakerState(p, 0));
+
+        // MCP 工具指标
+        List.of("true", "false").forEach(success -> {
+            Counter.builder("hify_mcp_tool_calls_total")
+                    .tag("tool", "unknown").tag("success", success)
+                    .description("Total MCP tool call attempts").register(registry);
+        });
+        DistributionSummary.builder("hify_mcp_tool_duration_ms")
+                .tag("tool", "unknown").description("MCP tool call duration in milliseconds")
+                .publishPercentileHistogram(true).register(registry);
     }
 
     // ── 对话 ──────────────────────────────────────────────────
