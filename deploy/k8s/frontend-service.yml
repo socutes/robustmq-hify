@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hify-frontend
+  namespace: hify
+  labels:
+    app: hify-frontend
+spec:
+  type: NodePort
+  selector:
+    app: hify-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 30080   # 范围 30000-32767，按实际环境修改
+      protocol: TCP

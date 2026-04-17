@@ -48,17 +48,25 @@ public class ChatController {
     }
 
     /**
-     * 发送消息。
-     * stream=true  → Accept: text/event-stream，返回 SseEmitter
-     * stream=false → 返回 Result<MessageResp>
+     * 流式对话，返回 SSE 事件流。
      */
-    @PostMapping(value = "/sessions/{sessionId}/messages", produces = {"text/event-stream", "application/json"})
-    public Object sendMessage(@PathVariable Long sessionId,
-                              @Valid @RequestBody SendMessageRequest request) {
+    @PostMapping(value = "/sessions/{sessionId}/messages/stream", produces = "text/event-stream")
+    public SseEmitter streamMessage(@PathVariable Long sessionId,
+                                    @Valid @RequestBody SendMessageRequest request) {
+        return chatService.streamChat(sessionId, request);
+    }
+
+    /**
+     * 同步对话，返回完整回复。
+     */
+    @PostMapping("/sessions/{sessionId}/messages")
+    public Result<MessageResp> sendMessage(@PathVariable Long sessionId,
+                                           @Valid @RequestBody SendMessageRequest request) {
         if (request.isStream()) {
-            return chatService.streamChat(sessionId, request);
-        } else {
+            // 兼容旧调用：stream=true 但打到了同步接口，重定向逻辑在此
+            // 建议前端改用 /messages/stream 接口
             return Result.ok(chatService.syncChat(sessionId, request));
         }
+        return Result.ok(chatService.syncChat(sessionId, request));
     }
 }

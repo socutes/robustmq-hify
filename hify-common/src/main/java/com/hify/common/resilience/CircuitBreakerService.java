@@ -1,6 +1,7 @@
 package com.hify.common.resilience;
 
 import com.hify.common.http.LlmApiException;
+import com.hify.common.metrics.HifyMetrics;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -62,11 +63,14 @@ public class CircuitBreakerService {
 
     private final CircuitBreakerRegistry circuitBreakerRegistry;
     private final RetryRegistry retryRegistry;
+    private final HifyMetrics metrics;
 
     public CircuitBreakerService(CircuitBreakerRegistry circuitBreakerRegistry,
-                                 RetryRegistry retryRegistry) {
+                                 RetryRegistry retryRegistry,
+                                 HifyMetrics metrics) {
         this.circuitBreakerRegistry = circuitBreakerRegistry;
         this.retryRegistry = retryRegistry;
+        this.metrics = metrics;
     }
 
     /**
@@ -75,12 +79,22 @@ public class CircuitBreakerService {
     public CircuitBreaker getCircuitBreaker(String providerName) {
         return circuitBreakers.computeIfAbsent(providerName, name -> {
             CircuitBreaker cb = CircuitBreaker.of(name, CB_CONFIG);
+            // 初始状态 CLOSED=0
+            metrics.circuitBreakerState(name, 0);
             cb.getEventPublisher()
-                .onStateTransition(e -> log.warn(
-                    "熔断器 [{}] 状态变更：{} → {}",
-                    name, e.getStateTransition().getFromState(), e.getStateTransition().getToState()
-                ));
-            log.info("创建熔断器 [{}]", name);
+                .onStateTransition(e -> {
+                    CircuitBreaker.State toState = e.getStateTransition().getToState();
+                    int stateCode = switch (toState) {
+                        case CLOSED    -> 0;
+                        case OPEN      -> 1;
+                        case HALF_OPEN -> 2;
+                        default        -> 0;
+                    };
+                    metrics.circuitBreakerState(name, stateCode);
+                    log.warn("action=circuit_breaker_transition provider={} from={} to={}",
+                        name, e.getStateTransition().getFromState(), toState);
+                });
+            log.info("action=circuit_breaker_created provider={}", name);
             return cb;
         });
     }

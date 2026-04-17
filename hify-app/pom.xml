@@ -57,6 +57,23 @@
             <artifactId>hify-chat</artifactId>
         </dependency>
 
+        <!-- Actuator + Prometheus -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+        <!-- PostgreSQL driver（pgvector 健康检查用） -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- H2 内存数据库，仅用于 mock profile -->
         <dependency>
             <groupId>com.h2database</groupId>

@@ -10,7 +10,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 make: *** No rule to make target `all'.  Stop.
 
 
-# Make data base, printed on Mon Apr  6 22:12:50 2026
+# Make data base, printed on Mon Apr 13 22:07:07 2026
 
 # Variables
 
@@ -30,16 +30,14 @@ VSCEXT_TELEMETRY_ID = 3a25a3bc-8e67-47c4-9aec-b0379d3a7ed4
 ?D = $(patsubst %/,%,$(dir $?))
 # environment
 VSCEXT_TRUSTIFY_DA_PIP_PATH = pip
+ 
 # environment
 VSCEXT_TRUSTIFY_DA_PNPM_PATH = pnpm
-# environment
-COPILOT_OTEL_ENABLED = true
 # automatic
 @D = $(patsubst %/,%,$(dir $@))
 # automatic
 @F = $(notdir $@)
 # makefile
- 
 CURDIR := /Users/oker/Desktop/hify
 # environment
 VSCEXT_MATCH_MANIFEST_VERSIONS = true
@@ -48,13 +46,11 @@ SHELL = /bin/sh
 # makefile (from `Makefile', line 1)
 ROOT_DIR := /Users/oker/Desktop/hify
 # environment
-VSCODE_NLS_CONFIG = {"userLocale":"zh-cn","osLocale":"zh-cn","resolvedLanguage":"zh-cn","defaultMessagesFile":"/Users/oker/Desktop/Visual Studio Code.app/Contents/Resources/app/out/nls.messages.json","languagePack":{"translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/tcf.json","messagesFile":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/e7fb5e96c0730b9deb70b33781f98e2f35975036/nls.messages.json","corruptMarkerFile":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/corrupted.info"},"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"9f249a5199ee038ca4a1295a328897d2.zh-cn","_languagePackSupport":true,"_translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/tcf.json","_cacheRoot":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn","_resolvedLanguagePackCoreLocation":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/e7fb5e96c0730b9deb70b33781f98e2f35975036","_corruptedFile":"/Users/oker/Library/Application Support/Code/clp/9f249a5199ee038ca4a1295a328897d2.zh-cn/corrupted.info"}
+VSCODE_NLS_CONFIG = {"userLocale":"zh-cn","osLocale":"zh-cn","resolvedLanguage":"zh-cn","defaultMessagesFile":"/Users/oker/Desktop/Visual Studio Code.app/Contents/Resources/app/out/nls.messages.json","languagePack":{"translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/45b3fd011250cb759850aead7545ef37.zh-cn/tcf.json","messagesFile":"/Users/oker/Library/Application Support/Code/clp/45b3fd011250cb759850aead7545ef37.zh-cn/41dd792b5e652393e7787322889ed5fdc58bd75b/nls.messages.json","corruptMarkerFile":"/Users/oker/Library/Application Support/Code/clp/45b3fd011250cb759850aead7545ef37.zh-cn/corrupted.info"},"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"45b3fd011250cb759850aead7545ef37.zh-cn","_languagePackSupport":true,"_translationsConfigFile":"/Users/oker/Library/Application Support/Code/clp/45b3fd011250cb759850aead7545ef37.zh-cn/tcf.json","_cacheRoot":"/Users/oker/Library/Application Support/Code/clp/45b3fd011250cb759850aead7545ef37.zh-cn","_resolvedLanguagePackCoreLocation":"/Users/oker/Library/Application Support/Code/clp/45b3fd011250cb759850aead7545ef37.zh-cn/41dd792b5e652393e7787322889ed5fdc58bd75b","_corruptedFile":"/Users/oker/Library/Application Support/Code/clp/45b3fd011250cb759850aead7545ef37.zh-cn/corrupted.info"}
 # environment
 _ = /usr/bin/make
 # environment
-COPILOT_OTEL_EXPORTER_TYPE = file
-# environment
-VSCODE_PID = 47745
+VSCODE_PID = 14006
 # makefile (from `Makefile', line 1)
 MAKEFILE_LIST :=  Makefile
 # makefile (from `Makefile', line 2)
@@ -66,11 +62,9 @@ INFOPATH = /opt/homebrew/share/info:
 # environment
 VSCEXT_TRUSTIFY_DA_SKOPEO_PATH = skopeo
 # environment
-USER = oker
-# environment
 VSCODE_CWD = /
 # environment
-PATH = /Users/oker/okgit:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/oker/.cargo/bin
+PATH = /usr/local/bin/mac_agent/.globalBase/usr/bin:/Users/oker/okgit:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/oker/.cargo/bin
 # environment
 VSCEXT_ENABLE_PYTHON_BEST_EFFORTS_INSTALLATION = false
 # environment
@@ -88,13 +82,9 @@ VSCEXT_TRUSTIFY_DA_PODMAN_PATH = podman
 # environment
 VSCEXT_TRUSTIFY_DA_PYTHON_PATH = python
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.41pE8fSb19/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.CZfujUI4Zj/Listeners
 # automatic
 %F = $(notdir $%)
-# environment
-OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT = true
-# environment
-ENABLE_PYTHON_MIGRATION = true
 # environment
 PWD = /Users/oker/Desktop/hify
 # environment
@@ -112,7 +102,7 @@ HOMEBREW_CELLAR = /opt/homebrew/Cellar
 # default
 MAKEFILEPATH = $(shell /usr/bin/xcode-select -print-path 2>/dev/null || echo /Developer)/Makefiles
 # environment
-VSCODE_CODE_CACHE_PATH = /Users/oker/Library/Application Support/Code/CachedData/e7fb5e96c0730b9deb70b33781f98e2f35975036
+VSCODE_CODE_CACHE_PATH = /Users/oker/Library/Application Support/Code/CachedData/41dd792b5e652393e7787322889ed5fdc58bd75b
 # environment
 VSCEXT_TRUSTIFY_DA_BACKEND_URL = https://rhda.rhcloud.com
 # environment
@@ -126,7 +116,7 @@ ZSH = /Users/oker/.oh-my-zsh
 # environment
 VSCEXT_TRUSTIFY_DA_SYFT_CONFIG_PATH = 
 # environment
-CLAUDE_AGENT_SDK_VERSION = 0.2.92
+CLAUDE_AGENT_SDK_VERSION = 0.2.101
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # automatic
@@ -150,11 +140,9 @@ VSCEXT_TRUSTIFY_DA_DOCKER_PATH = docker
 # default
 MAKE_VERSION := 3.81
 # environment
-COPILOT_OTEL_FILE_EXPORTER_PATH = /dev/null
+USER = oker
 # makefile
 .DEFAULT_GOAL := start
-# environment
-APPLICATION_INSIGHTS_NO_STATSBEAT = true
 # environment
 LESS = -R
 # automatic
@@ -190,13 +178,13 @@ MFLAGS = -Rrqp
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-XPC_SERVICE_NAME = application.com.microsoft.VSCode.200799537.200799543
+XPC_SERVICE_NAME = application.com.microsoft.VSCode.208085935.208085942
 # environment
 HOMEBREW_PREFIX = /opt/homebrew
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # environment
-VSCODE_L10N_BUNDLE_LOCATION = file:///Users/oker/.vscode/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.110.2026040511/translations/extensions/vscode.json-language-features.i18n.json
+VSCODE_L10N_BUNDLE_LOCATION = file:///Users/oker/.vscode/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.110.2026041114/translations/extensions/vscode.json-language-features.i18n.json
 # automatic
 +F = $(notdir $+)
 # environment
@@ -244,7 +232,7 @@ APPLICATIONINSIGHTS_CONFIGURATION_CONTENT = {}
 # environment
 VSCEXT_TRUSTIFY_DA_PYTHON3_PATH = python3
 # variable set hash-table stats:
-# Load=114/1024=11%, Rehash=0, Collisions=8/144=6%
+# Load=108/1024=11%, Rehash=0, Collisions=7/138=5%
 
 # Pattern-specific Variable Values
 
@@ -252,7 +240,7 @@ VSCEXT_TRUSTIFY_DA_PYTHON3_PATH = python3
 
 # Directories
 
-# . (device 16777230, inode 192426922): 23 files, no impossibilities.
+# . (device 16777233, inode 192426922): 23 files, no impossibilities.
 
 # 23 files, no impossibilities in 1 directories.
 
@@ -396,6 +384,6 @@ clean:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Mon Apr  6 22:12:50 2026
+# Finished Make data base on Mon Apr 13 22:07:07 2026
 
  

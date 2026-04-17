@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hify-backend
+  namespace: hify
+  labels:
+    app: hify-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: hify-backend
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP

@@ -1,6 +1,20 @@
 server:
   port: 8080
 
+management:
+  server:
+    port: 8081          # Actuator 独立端口，不通过 Nginx 对外暴露
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: hify   # 所有指标自动带 application=hify 标签
+
 spring:
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:hify}?useUnicode=true&characterEncoding=utf8mb4&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
@@ -26,6 +40,13 @@ spring:
           max-active: 10
           max-idle: 8
           max-wait: -1ms
+
+  pgvector:
+    host: ${PGVECTOR_HOST:}
+    port: ${PGVECTOR_PORT:5432}
+    database: ${PGVECTOR_DB:hify}
+    username: ${PGVECTOR_USERNAME:}
+    password: ${PGVECTOR_PASSWORD:}
 
 resilience4j:
   circuitbreaker:

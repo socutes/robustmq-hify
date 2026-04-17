@@ -2,19 +2,14 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PID_DIR="$ROOT_DIR/.pids"
-BACKEND_PID_FILE="$PID_DIR/backend.pid"
-FRONTEND_PID_FILE="$PID_DIR/frontend.pid"
-BACKEND_LOG="$ROOT_DIR/logs/backend.log"
-FRONTEND_LOG="$ROOT_DIR/logs/frontend.log"
+PID_FILE="$ROOT_DIR/hify.pid"
+LOG_FILE="$ROOT_DIR/logs/hify.log"
+JAR="$ROOT_DIR/hify-app.jar"
+CONFIG="$ROOT_DIR/application.yml"
 
-DB_HOST="${DB_HOST:-localhost}"
-DB_PORT="${DB_PORT:-3306}"
-REDIS_HOST="${REDIS_HOST:-localhost}"
-REDIS_PORT="${REDIS_PORT:-6379}"
-BACKEND_PORT="${BACKEND_PORT:-8080}"
+BACKEND_PORT="${SERVER_PORT:-8080}"
 HEALTH_URL="http://localhost:${BACKEND_PORT}/api/v1/health"
-HEALTH_TIMEOUT=60
+HEALTH_TIMEOUT=90
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -26,75 +21,78 @@ warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
 die()   { error "$*"; exit 1; }
 
-mkdir -p "$PID_DIR" "$(dirname "$BACKEND_LOG")"
+# ── 前置检查 ──────────────────────────────────────────────────
+[[ -f "$JAR" ]]    || die "找不到 $JAR，请先构建或解压发布包"
+command -v java &>/dev/null || die "未找到 java 命令，请安装 JRE 17+"
 
-# ── 检查依赖命令 ──────────────────────────────────────────────
-for cmd in mvn node npm curl nc; do
-  command -v "$cmd" &>/dev/null || die "缺少命令：$cmd"
-done
+java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d. -f1)
+[[ "$java_version" -ge 17 ]] 2>/dev/null || die "需要 Java 17+，当前版本：$java_version"
 
-# ── 检查 MySQL ────────────────────────────────────────────────
-info "检查 MySQL ${DB_HOST}:${DB_PORT} ..."
-nc -z -w3 "$DB_HOST" "$DB_PORT" 2>/dev/null \
-  || die "MySQL 不可达（${DB_HOST}:${DB_PORT}），请先启动 MySQL"
-info "MySQL 可用"
+if [[ -f "$PID_FILE" ]]; then
+  pid=$(cat "$PID_FILE")
+  if kill -0 "$pid" 2>/dev/null; then
+    warn "Hify 已在运行（PID=${pid}），如需重启请先执行 stop.sh"
+    exit 0
+  fi
+  rm -f "$PID_FILE"
+fi
 
-# ── 检查 Redis ────────────────────────────────────────────────
-info "检查 Redis ${REDIS_HOST}:${REDIS_PORT} ..."
-nc -z -w3 "$REDIS_HOST" "$REDIS_PORT" 2>/dev/null \
-  || die "Redis 不可达（${REDIS_HOST}:${REDIS_PORT}），请先启动 Redis"
-info "Redis 可用"
+mkdir -p "$(dirname "$LOG_FILE")"
 
-# ── 构建后端 ──────────────────────────────────────────────────
-info "构建后端 ..."
-mvn -f "$ROOT_DIR/pom.xml" clean package -DskipTests -q \
-  || die "后端构建失败"
-info "后端构建完成"
+# ── 加载 .env（可选）─────────────────────────────────────────
+if [[ -f "$ROOT_DIR/.env" ]]; then
+  info "加载 .env 配置文件"
+  set -a
+  # shellcheck disable=SC1091
+  source "$ROOT_DIR/.env"
+  set +a
+fi
 
-JAR=$(find "$ROOT_DIR/hify-app/target" -maxdepth 1 -name "*.jar" ! -name "*sources*" | head -1)
-[[ -f "$JAR" ]] || die "找不到后端 jar，构建可能未成功"
+# ── 构造 JVM 参数 ─────────────────────────────────────────────
+JVM_OPTS="${JVM_OPTS:--Xms256m -Xmx512m}"
 
-# ── 启动后端 ──────────────────────────────────────────────────
-info "启动后端 ..."
-nohup java -jar "$JAR" \
-  --server.port="$BACKEND_PORT" \
-  > "$BACKEND_LOG" 2>&1 &
-BACKEND_PID=$!
-echo "$BACKEND_PID" > "$BACKEND_PID_FILE"
-info "后端进程 PID=${BACKEND_PID}，日志：$BACKEND_LOG"
+SPRING_ARGS=(
+  "--server.port=${SERVER_PORT:-8080}"
+)
 
-# ── 等待健康检查 ──────────────────────────────────────────────
-info "等待后端就绪（最多 ${HEALTH_TIMEOUT}s）..."
+# 外部 application.yml 优先级高于 jar 内置配置
+if [[ -f "$CONFIG" ]]; then
+  SPRING_ARGS+=("--spring.config.location=file:${CONFIG}")
+fi
+
+# ── 启动 ──────────────────────────────────────────────────────
+info "启动 Hify ..."
+info "  JAR     : $JAR"
+info "  日志    : $LOG_FILE"
+info "  JVM     : $JVM_OPTS"
+
+# shellcheck disable=SC2086
+nohup java $JVM_OPTS -jar "$JAR" "${SPRING_ARGS[@]}" \
+  >> "$LOG_FILE" 2>&1 &
+
+PID=$!
+echo "$PID" > "$PID_FILE"
+info "进程 PID=$PID，日志：$LOG_FILE"
+
+# ── 健康检查 ──────────────────────────────────────────────────
+info "等待服务就绪（最多 ${HEALTH_TIMEOUT}s）..."
 elapsed=0
 until curl -sf "$HEALTH_URL" &>/dev/null; do
+  if ! kill -0 "$PID" 2>/dev/null; then
+    error "进程已退出，最后几行日志："
+    tail -30 "$LOG_FILE" >&2
+    rm -f "$PID_FILE"
+    die "Hify 启动失败"
+  fi
   sleep 2
   elapsed=$((elapsed + 2))
   if [[ $elapsed -ge $HEALTH_TIMEOUT ]]; then
-    error "后端启动超时，最后几行日志："
-    tail -20 "$BACKEND_LOG" >&2
-    die "后端未能在 ${HEALTH_TIMEOUT}s 内就绪"
+    error "启动超时，最后几行日志："
+    tail -30 "$LOG_FILE" >&2
+    die "Hify 未能在 ${HEALTH_TIMEOUT}s 内就绪"
   fi
-  echo -n "."
+  printf "."
 done
 echo
-info "后端已就绪"
 
-# ── 安装前端依赖（仅首次或 package.json 变更后）──────────────
-if [[ ! -d "$ROOT_DIR/hify-web/node_modules" ]]; then
-  info "安装前端依赖 ..."
-  npm --prefix "$ROOT_DIR/hify-web" install --silent \
-    || die "前端依赖安装失败"
-fi
-
-# ── 启动前端 ──────────────────────────────────────────────────
-info "启动前端开发服务器 ..."
-nohup npm --prefix "$ROOT_DIR/hify-web" run dev \
-  > "$FRONTEND_LOG" 2>&1 &
-FRONTEND_PID=$!
-echo "$FRONTEND_PID" > "$FRONTEND_PID_FILE"
-info "前端进程 PID=${FRONTEND_PID}，日志：$FRONTEND_LOG"
-
-echo
-info "✅ Hify 已启动"
-info "   后端：http://localhost:${BACKEND_PORT}"
-info "   前端：http://localhost:5173"
+info "✅ Hify 启动成功：http://localhost:${SERVER_PORT:-8080}"

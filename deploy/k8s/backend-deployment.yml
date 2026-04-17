@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hify-backend
+  namespace: hify
+  labels:
+    app: hify-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hify-backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0   # 滚动更新期间保持 2 个副本始终可用
+  template:
+    metadata:
+      labels:
+        app: hify-backend
+    spec:
+      # 两个副本打散到不同节点，避免单点故障
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: hify-backend
+                topologyKey: kubernetes.io/hostname
+
+      containers:
+        - name: backend
+          image: hify-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+
+          # ── 环境变量：非敏感配置来自 ConfigMap ───────────────
+          envFrom:
+            - configMapRef:
+                name: hify-backend-config
+
+          # ── 环境变量：敏感配置来自 Secret ─────────────────────
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hify-backend-secret
+                  key: DB_PASSWORD
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hify-backend-secret
+                  key: REDIS_PASSWORD
+            - name: PGVECTOR_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hify-backend-secret
+                  key: PGVECTOR_PASSWORD
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hify-backend-secret
+                  key: OPENAI_API_KEY
+
+          # ── 资源限制 ──────────────────────────────────────────
+          resources:
+            requests:
+              cpu:    "250m"
+              memory: "512Mi"
+            limits:
+              cpu:    "1000m"
+              memory: "1Gi"
+
+          # ── 探针 ──────────────────────────────────────────────
+          # readiness：Pod 就绪后才接收流量
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 3
+
+          # liveness：检测到僵死时重启容器
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+            initialDelaySeconds: 60   # 给 Spring Boot 足够启动时间
+            periodSeconds: 20
+            failureThreshold: 3
+
+          # ── 日志挂载 ──────────────────────────────────────────
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+
+      volumes:
+        - name: logs
+          emptyDir: {}
+
+      # 优雅停止：Spring Boot 接收 SIGTERM 后完成在途请求再退出
+      terminationGracePeriodSeconds: 60

@@ -35,6 +35,9 @@
         <resilience4j.version>2.2.0</resilience4j.version>
         <pgvector.version>0.1.4</pgvector.version>
         <okhttp.version>4.12.0</okhttp.version>
+        <logstash-encoder.version>7.4</logstash-encoder.version>
+        <opentelemetry.version>1.38.0</opentelemetry.version>
+        <micrometer-prometheus.version>1.12.3</micrometer-prometheus.version>
     </properties>
 
     <dependencyManagement>
@@ -87,6 +90,35 @@
                 <groupId>com.pgvector</groupId>
                 <artifactId>pgvector</artifactId>
                 <version>${pgvector.version}</version>
+            </dependency>
+
+            <!-- Logstash Logback Encoder（JSON 结构化日志） -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-encoder.version}</version>
+            </dependency>
+
+            <!-- Micrometer Prometheus Registry -->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-prometheus</artifactId>
+                <version>${micrometer-prometheus.version}</version>
+            </dependency>
+
+            <!-- OpenTelemetry API（仅 API，不引入 SDK 实现，为后续接 Jaeger 留口子） -->
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-api</artifactId>
+                <version>${opentelemetry.version}</version>
+            </dependency>
+
+            <!-- Test -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <!-- Internal modules -->

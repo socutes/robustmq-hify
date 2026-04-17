@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hify-backend-config
+  namespace: hify
+data:
+  # ── MySQL ─────────────────────────────────────────────────────
+  DB_HOST:     "YOUR_MYSQL_HOST"
+  DB_PORT:     "3306"
+  DB_NAME:     "hify"
+  DB_USERNAME: "hify"
+
+  # ── Redis ─────────────────────────────────────────────────────
+  REDIS_HOST: "YOUR_REDIS_HOST"
+  REDIS_PORT: "6379"
+
+  # ── pgvector（PostgreSQL）─────────────────────────────────────
+  PGVECTOR_HOST:     "YOUR_PGVECTOR_HOST"
+  PGVECTOR_PORT:     "5432"
+  PGVECTOR_DB:       "hify"
+  PGVECTOR_USERNAME: "hify"
+
+  # ── 应用 ──────────────────────────────────────────────────────
+  SERVER_PORT: "8080"
+  JVM_OPTS:    "-Xms256m -Xmx512m"

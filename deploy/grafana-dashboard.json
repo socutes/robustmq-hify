@@ -1,0 +1,246 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" }
+  ],
+  "annotations": { "list": [] },
+  "description": "Hify AI Agent Platform - Core Metrics",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+
+    {
+      "id": 1,
+      "title": "对话量 QPS（按 Agent 分组）",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2 },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "expr": "sum by (agent_id) (rate(hify_chat_requests_total[2m]))",
+          "legendFormat": "agent={{agent_id}}",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 2,
+      "title": "对话延迟 P50 / P95 / P99",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2 },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(hify_chat_duration_ms_bucket[5m])))",
+          "legendFormat": "P50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(hify_chat_duration_ms_bucket[5m])))",
+          "legendFormat": "P95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(hify_chat_duration_ms_bucket[5m])))",
+          "legendFormat": "P99",
+          "refId": "C"
+        }
+      ]
+    },
+
+    {
+      "id": 3,
+      "title": "LLM 调用成功率（按 Provider）",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2 },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "last"] },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "expr": "sum by (provider) (rate(hify_llm_calls_total{success=\"true\"}[5m])) / sum by (provider) (rate(hify_llm_calls_total[5m]))",
+          "legendFormat": "{{provider}}",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 4,
+      "title": "LLM 调用延迟 P95（按 Provider）",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2 },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (provider, le) (rate(hify_llm_duration_ms_bucket[5m])))",
+          "legendFormat": "{{provider}} P95",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 5,
+      "title": "熔断器状态（各 Provider）",
+      "type": "table",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "left" } },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "状态" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "0": { "text": "CLOSED",    "color": "green" } } },
+                  { "type": "value", "options": { "1": { "text": "OPEN",      "color": "red"   } } },
+                  { "type": "value", "options": { "2": { "text": "HALF_OPEN", "color": "yellow"} } }
+                ]
+              },
+              { "id": "custom.displayMode", "value": "color-background" }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "sortBy": [{ "displayName": "Provider", "desc": false }]
+      },
+      "transformations": [
+        { "id": "labelsToFields", "options": { "mode": "columns" } },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": { "provider": "Provider", "Value": "状态" },
+            "excludeByName": { "Time": true, "__name__": true }
+          }
+        }
+      ],
+      "targets": [
+        {
+          "expr": "hify_circuit_breaker_state",
+          "instant": true,
+          "legendFormat": "{{provider}}",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "id": 6,
+      "title": "MCP 工具调用成功率（按工具）",
+      "type": "bargauge",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red",    "value": 0   },
+              { "color": "yellow", "value": 0.9 },
+              { "color": "green",  "value": 0.99 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "sum by (tool) (rate(hify_mcp_tool_calls_total{success=\"true\"}[5m])) / sum by (tool) (rate(hify_mcp_tool_calls_total[5m]))",
+          "legendFormat": "{{tool}}",
+          "refId": "A"
+        }
+      ]
+    }
+
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["hify", "ai", "llm"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "数据源",
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Hify - AI Agent Platform",
+  "uid": "hify-main",
+  "version": 1
+}

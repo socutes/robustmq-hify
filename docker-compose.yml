@@ -1,0 +1,59 @@
+services:
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hify-backend:latest
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8080
+      JVM_OPTS: ${JVM_OPTS:--Xms256m -Xmx512m}
+      # MySQL
+      DB_HOST:     ${DB_HOST}
+      DB_PORT:     ${DB_PORT:-3306}
+      DB_NAME:     ${DB_NAME:-hify}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Redis
+      REDIS_HOST:     ${REDIS_HOST}
+      REDIS_PORT:     ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      # pgvector
+      PGVECTOR_HOST:     ${PGVECTOR_HOST}
+      PGVECTOR_PORT:     ${PGVECTOR_PORT:-5432}
+      PGVECTOR_DB:       ${PGVECTOR_DB:-hify}
+      PGVECTOR_USERNAME: ${PGVECTOR_USERNAME}
+      PGVECTOR_PASSWORD: ${PGVECTOR_PASSWORD}
+    ports:
+      - "${BACKEND_EXPOSE_PORT:-8080}:8080"
+    volumes:
+      - ./logs:/app/logs
+      # 外部 application.yml 覆盖内置配置（可选，不挂载也能启动）
+      - ./deploy/application.yml.template:/app/config/application.yml:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+    networks:
+      - hify-net
+
+  frontend:
+    build:
+      context: ./hify-web
+      dockerfile: Dockerfile
+    image: hify-frontend:latest
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_EXPOSE_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - hify-net
+
+networks:
+  hify-net:
+    driver: bridge

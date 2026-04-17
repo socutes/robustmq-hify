@@ -2,10 +2,8 @@
 set -uo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PID_DIR="$ROOT_DIR/.pids"
-BACKEND_PID_FILE="$PID_DIR/backend.pid"
-FRONTEND_PID_FILE="$PID_DIR/frontend.pid"
-TERM_TIMEOUT=15
+PID_FILE="$ROOT_DIR/hify.pid"
+TERM_TIMEOUT=30
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -16,44 +14,34 @@ info()  { echo -e "${GREEN}[INFO]${NC}  $*"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
 
-stop_process() {
-  local name="$1"
-  local pid_file="$2"
+if [[ ! -f "$PID_FILE" ]]; then
+  warn "PID 文件不存在（$PID_FILE），Hify 可能未在运行"
+  exit 0
+fi
 
-  if [[ ! -f "$pid_file" ]]; then
-    warn "${name}：PID 文件不存在，跳过"
-    return
+PID=$(cat "$PID_FILE")
+
+if ! kill -0 "$PID" 2>/dev/null; then
+  warn "进程 PID=${PID} 已不在运行"
+  rm -f "$PID_FILE"
+  exit 0
+fi
+
+info "正在停止 Hify（PID=${PID}）..."
+kill -TERM "$PID" 2>/dev/null
+
+elapsed=0
+while kill -0 "$PID" 2>/dev/null; do
+  sleep 1
+  elapsed=$((elapsed + 1))
+  if [[ $elapsed -ge $TERM_TIMEOUT ]]; then
+    warn "进程未在 ${TERM_TIMEOUT}s 内退出，强制终止"
+    kill -KILL "$PID" 2>/dev/null || true
+    break
   fi
-
-  local pid
-  pid=$(cat "$pid_file")
-
-  if ! kill -0 "$pid" 2>/dev/null; then
-    warn "${name}（PID=${pid}）已不在运行"
-    rm -f "$pid_file"
-    return
-  fi
-
-  info "停止 ${name}（PID=${pid}）..."
-  kill -TERM "$pid" 2>/dev/null
-
-  local elapsed=0
-  while kill -0 "$pid" 2>/dev/null; do
-    sleep 1
-    elapsed=$((elapsed + 1))
-    if [[ $elapsed -ge $TERM_TIMEOUT ]]; then
-      warn "${name} 未在 ${TERM_TIMEOUT}s 内退出，强制 SIGKILL"
-      kill -KILL "$pid" 2>/dev/null || true
-      break
-    fi
-  done
-
-  rm -f "$pid_file"
-  info "${name} 已停止"
-}
-
-stop_process "前端" "$FRONTEND_PID_FILE"
-stop_process "后端" "$BACKEND_PID_FILE"
-
+  printf "."
+done
 echo
+
+rm -f "$PID_FILE"
 info "✅ Hify 已停止"

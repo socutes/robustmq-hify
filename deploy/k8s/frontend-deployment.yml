@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hify-frontend
+  namespace: hify
+  labels:
+    app: hify-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hify-frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: hify-frontend
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: hify-frontend
+                topologyKey: kubernetes.io/hostname
+
+      containers:
+        - name: frontend
+          image: hify-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+
+          # ── 资源限制（Nginx 托管静态文件，资源需求远小于后端）──
+          resources:
+            requests:
+              cpu:    "50m"
+              memory: "64Mi"
+            limits:
+              cpu:    "200m"
+              memory: "128Mi"
+
+          # ── 探针 ──────────────────────────────────────────────
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            failureThreshold: 3
+
+      terminationGracePeriodSeconds: 15

@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: hify
+  labels:
+    app: prometheus
+spec:
+  replicas: 1   # Prometheus 单实例，数据靠 PVC 持久化
+  selector:
+    matchLabels:
+      app: prometheus
+  strategy:
+    type: Recreate   # PVC ReadWriteOnce 不允许多 Pod 同时挂载，必须用 Recreate
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      # 挂载前先把数据目录权限改为 nobody（Prometheus 默认运行用户 UID=65534）
+      initContainers:
+        - name: init-chown
+          image: busybox:1.36
+          command: ["chown", "-R", "65534:65534", "/prometheus"]
+          volumeMounts:
+            - name: data
+              mountPath: /prometheus
+
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.51.0
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--storage.tsdb.retention.time=15d"   # 保留 15 天数据
+            - "--web.enable-lifecycle"               # 支持 POST /-/reload 热重载配置
+          ports:
+            - containerPort: 9090
+
+          resources:
+            requests:
+              cpu:    "100m"
+              memory: "256Mi"
+            limits:
+              cpu:    "500m"
+              memory: "1Gi"
+
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 30
+            periodSeconds: 15
+
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+              readOnly: true
+            - name: data
+              mountPath: /prometheus
+
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: prometheus-data

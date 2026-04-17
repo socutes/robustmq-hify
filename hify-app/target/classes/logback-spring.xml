@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOG_DIR" value="${LOG_DIR:-logs}"/>
-    <property name="APP_NAME" value="hify"/>
-    <property name="LOG_PATTERN" value="%d{HH:mm:ss} [%thread] [%X{traceId}] %-5level %logger{20} - %msg%n"/>
-
-    <!-- ── 开发环境：控制台彩色输出 ─────────────────────────── -->
-    <!-- 开发/mock 共用普通控制台，彩色扩展通过 Spring Boot 的 conversion rule 注册 -->
-    <conversionRule conversionWord="clr"
-                    converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
-
+    <!-- ── 开发 / mock：控制台可读格式 ───────────────────────── -->
     <springProfile name="default,dev,mock">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                <pattern>%d{HH:mm:ss} [%thread] [%X{traceId}] %-5level %logger{20} - %msg%n</pattern>
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] [%X{traceId}] %-5level %logger{30} - %msg%n</pattern>
                 <charset>UTF-8</charset>
             </encoder>
         </appender>
@@ -23,29 +15,42 @@
         </root>
     </springProfile>
 
-    <!-- ── 生产环境：JSON 格式滚动文件输出 ───────────────────── -->
+    <!-- ── 生产：JSON 格式输出到 stdout，由 K8s 采集 ─────────── -->
     <springProfile name="prod">
-        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>${LOG_DIR}/${APP_NAME}.log</file>
-            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>${LOG_DIR}/${APP_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
-                <maxHistory>30</maxHistory>
-                <totalSizeCap>5GB</totalSizeCap>
-            </rollingPolicy>
-            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                <pattern>{"time":"%d{yyyy-MM-dd HH:mm:ss.SSS}","thread":"%thread","traceId":"%X{traceId}","level":"%-5level","logger":"%logger{36}","message":"%replace(%msg){'\"','\\\"'}"}%n</pattern>
-                <charset>UTF-8</charset>
+        <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <!-- 固定字段顺序：timestamp → level → traceId → thread → logger → message -->
+                <fieldNames>
+                    <timestamp>timestamp</timestamp>
+                    <message>message</message>
+                    <logger>logger</logger>
+                    <thread>thread</thread>
+                    <level>level</level>
+                    <levelValue>[ignore]</levelValue>
+                </fieldNames>
+                <!-- MDC 字段自动提升为顶层字段 -->
+                <includeMdcKeyName>traceId</includeMdcKeyName>
+                <includeMdcKeyName>sessionId</includeMdcKeyName>
+                <includeMdcKeyName>agentId</includeMdcKeyName>
+                <includeContext>false</includeContext>
+                <includeCallerData>false</includeCallerData>
+                <shortenedLoggerNameLength>36</shortenedLoggerNameLength>
+                <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                    <maxDepthPerCause>10</maxDepthPerCause>
+                    <rootCauseFirst>true</rootCauseFirst>
+                </throwableConverter>
             </encoder>
         </appender>
 
-        <appender name="FILE_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 异步包装，避免 I/O 阻塞业务线程 -->
+        <appender name="ASYNC_STDOUT" class="ch.qos.logback.classic.AsyncAppender">
             <discardingThreshold>0</discardingThreshold>
             <queueSize>512</queueSize>
-            <appender-ref ref="FILE"/>
+            <appender-ref ref="STDOUT_JSON"/>
         </appender>
 
         <root level="INFO">
-            <appender-ref ref="FILE_ASYNC"/>
+            <appender-ref ref="ASYNC_STDOUT"/>
         </root>
     </springProfile>
 

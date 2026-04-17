@@ -12,6 +12,9 @@ import com.hify.chat.mapper.ChatMessageMapper;
 import com.hify.chat.mapper.ChatSessionMapper;
 import com.hify.chat.service.ChatService;
 import com.hify.common.config.RedisUtil;
+import com.hify.common.log.MdcTaskWrapper;
+import com.hify.common.log.RequestLogInterceptor;
+import com.hify.common.metrics.HifyMetrics;
 import com.hify.common.dto.PageResult;
 import com.hify.common.dto.Result;
 import com.hify.common.exception.BizException;
@@ -40,6 +43,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.Duration;
+import org.slf4j.MDC;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +73,8 @@ public class ChatServiceImpl implements ChatService {
     private final Executor llmExecutor;
 
     private final WorkflowEngine workflowEngine;
+
+    private final HifyMetrics metrics;
 
     // Redis is optional — null in mock profile
     private final Optional<RedisUtil> redisUtil;
@@ -125,13 +132,20 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public SseEmitter streamChat(Long sessionId, SendMessageRequest request) {
-        SseEmitter emitter = new SseEmitter(60_000L); // 60s timeout
+        SseEmitter emitter = new SseEmitter(60_000L);
 
-        llmExecutor.execute(() -> {
+        log.info("action=chat_stream_start sessionId={}", sessionId);
+        long chatStart = System.currentTimeMillis();
+
+        // MdcTaskWrapper 把父线程的 traceId、sessionId 传播到 llmExecutor 线程
+        llmExecutor.execute(MdcTaskWrapper.wrap(() -> {
             try {
                 doStreamChat(sessionId, request.getContent(), emitter);
             } catch (Exception e) {
-                log.error("streamChat error session={}: {}", sessionId, e.getMessage());
+                log.error("action=chat_stream_error sessionId={} error={}", sessionId, e.getMessage(), e);
+                // agentId 在 doStreamChat 内才能获取，此处用 "unknown" 兜底
+                metrics.chatRequestIncrement("unknown");
+                metrics.chatRequestDuration("unknown", System.currentTimeMillis() - chatStart);
                 try {
                     String errEvent = objectMapper.writeValueAsString(
                             Map.of("type", "error", "message", e.getMessage() != null ? e.getMessage() : "LLM 调用失败"));
@@ -139,10 +153,13 @@ public class ChatServiceImpl implements ChatService {
                     emitter.complete();
                 } catch (Exception ignored) {}
             }
-        });
+        }));
 
-        emitter.onTimeout(emitter::complete);
-        emitter.onError(e -> log.warn("SSE error session={}: {}", sessionId, e.getMessage()));
+        emitter.onTimeout(() -> {
+            log.warn("action=chat_stream_timeout sessionId={}", sessionId);
+            emitter.complete();
+        });
+        emitter.onError(e -> log.warn("action=chat_stream_sse_error sessionId={} error={}", sessionId, e.getMessage()));
 
         return emitter;
     }
@@ -157,12 +174,18 @@ public class ChatServiceImpl implements ChatService {
             throw new BizException(ErrorCode.AGENT_NOT_FOUND);
         }
 
+        // 把 sessionId / agentId 注入 MDC，此线程后续所有日志都会带上这两个字段
+        MDC.put(RequestLogInterceptor.MDC_SESSION_ID, String.valueOf(sessionId));
+        MDC.put(RequestLogInterceptor.MDC_AGENT_ID, String.valueOf(agent.getId()));
+        String agentIdStr = String.valueOf(agent.getId());
+        long chatBegin = System.currentTimeMillis();
+
         // 2.5 如果 Agent 绑了工作流，走工作流引擎，不走直接 LLM 路径
         if (agent.getWorkflowId() != null) {
+            log.info("action=workflow_start sessionId={} agentId={} workflowId={}", sessionId, agent.getId(), agent.getWorkflowId());
             saveMessage(sessionId, "user", userContent, null, null, null);
             try {
                 String wfOutput = workflowEngine.execute(agent.getWorkflowId(), userContent);
-                // 流式模拟：按字推送工作流输出
                 for (String ch : wfOutput.split("")) {
                     String event = objectMapper.writeValueAsString(Map.of("type", "delta", "content", ch));
                     emitter.send(SseEmitter.event().data(event));
@@ -170,7 +193,9 @@ public class ChatServiceImpl implements ChatService {
                 saveMessage(sessionId, "assistant", wfOutput, null, "stop", null);
                 String doneEvent = objectMapper.writeValueAsString(Map.of("type", "done", "finishReason", "stop", "latencyMs", 0));
                 emitter.send(SseEmitter.event().data(doneEvent));
+                log.info("action=workflow_done sessionId={} agentId={}", sessionId, agent.getId());
             } catch (BizException e) {
+                log.warn("action=workflow_error sessionId={} agentId={} error={}", sessionId, agent.getId(), e.getMessage());
                 String errEvent = objectMapper.writeValueAsString(Map.of("type", "error", "message", e.getMessage()));
                 emitter.send(SseEmitter.event().data(errEvent));
             }
@@ -197,18 +222,18 @@ public class ChatServiceImpl implements ChatService {
         int maxMsgs = (agent.getMaxContextTurns() != null ? agent.getMaxContextTurns() : 10) * 2;
         List<Map<String, String>> contextMsgs = loadContext(sessionId, maxMsgs);
 
-        // 6.5 RAG 检索：Agent 绑了知识库则检索，否则跳过
+        // 6.5 RAG 检索
         List<ChunkVO> ragChunks = List.of();
         if (agent.getKnowledgeBaseId() != null) {
             ragChunks = knowledgeService.searchChunks(agent.getKnowledgeBaseId(), userContent, 3);
-            log.info("RAG 检索命中 {} 条 sessionId={} kbId={}", ragChunks.size(), sessionId, agent.getKnowledgeBaseId());
+            log.info("action=rag_retrieve sessionId={} kbId={} hits={}", sessionId, agent.getKnowledgeBaseId(), ragChunks.size());
         }
 
-        // 7. Build messages array: system(+RAG) + context + current user message
+        // 7. Build messages
         List<com.hify.provider.dto.ChatMessage> messages = buildMessages(
                 agent.getSystemPrompt(), ragChunks, contextMsgs, userContent);
 
-        // 8. 加载 Agent 绑定的 MCP 工具，构建 tools schema
+        // 8. 加载 MCP 工具 schema
         List<Map<String, Object>> toolSchemas = buildToolSchemas(agent.getId());
 
         // 9. Build ChatRequest
@@ -224,34 +249,66 @@ public class ChatServiceImpl implements ChatService {
         ProviderAdapter adapter = adapterFactory.get(provider.getType());
         long start = System.currentTimeMillis();
 
-        ChatResponse llmResp = adapter.streamChat(provider, chatRequest, delta -> {
-            try {
-                String event = objectMapper.writeValueAsString(Map.of("type", "delta", "content", delta));
-                emitter.send(SseEmitter.event().data(event));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+        log.info("action=llm_call_start sessionId={} agentId={} providerId={} modelName={} tools={}",
+                sessionId, agent.getId(), provider.getId(), modelConfig.getModelId(), toolSchemas.size());
 
-        // 11. 判断是否需要工具调用
+        ChatResponse llmResp;
+        try {
+            llmResp = adapter.streamChat(provider, chatRequest, delta -> {
+                try {
+                    String event = objectMapper.writeValueAsString(Map.of("type", "delta", "content", delta));
+                    emitter.send(SseEmitter.event().data(event));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (Exception e) {
+            long failMs = System.currentTimeMillis() - start;
+            log.error("action=llm_call_done sessionId={} agentId={} providerId={} modelName={} durationMs={} success=false error={}",
+                    sessionId, agent.getId(), provider.getId(), modelConfig.getModelId(), failMs, e.getMessage(), e);
+            metrics.llmCallIncrement(provider.getType(), modelConfig.getModelId(), false);
+            metrics.llmCallDuration(provider.getType(), modelConfig.getModelId(), failMs);
+            throw e;
+        }
+
+        long firstCallMs = System.currentTimeMillis() - start;
+        log.info("action=llm_call_done sessionId={} agentId={} providerId={} modelName={} durationMs={} success=true finishReason={} tokens={}",
+                sessionId, agent.getId(), provider.getId(), modelConfig.getModelId(), firstCallMs,
+                llmResp.getFinishReason(), llmResp.getCompletionTokens());
+        metrics.llmCallIncrement(provider.getType(), modelConfig.getModelId(), true);
+        metrics.llmCallDuration(provider.getType(), modelConfig.getModelId(), firstCallMs);
+
+        // 11. 工具调用（Function Calling 第二轮）
         if ("tool_calls".equals(llmResp.getFinishReason())
                 && llmResp.getToolCalls() != null && !llmResp.getToolCalls().isEmpty()) {
 
-            log.info("[MCP] finish_reason=tool_calls session={} tools={}", sessionId,
+            log.info("action=tool_call_start sessionId={} agentId={} tools={}", sessionId, agent.getId(),
                     llmResp.getToolCalls().stream().map(ChatResponse.ToolCall::getName).toList());
 
-            // 把 assistant 的 tool_calls 指令追加进消息历史
             com.hify.provider.dto.ChatMessage assistantMsg = new com.hify.provider.dto.ChatMessage();
             assistantMsg.setRole("assistant");
             assistantMsg.setContent("");
             assistantMsg.setToolCalls(llmResp.getToolCalls());
             messages.add(assistantMsg);
 
-            // 逐个执行工具调用，把结果作为 role=tool 消息追加
             for (ChatResponse.ToolCall toolCall : llmResp.getToolCalls()) {
-                String toolResult = executeToolCall(toolCall, agent.getId());
-                log.info("[MCP] tool={} result={}", toolCall.getName(),
-                        toolResult.length() > 100 ? toolResult.substring(0, 100) + "..." : toolResult);
+                long toolStart = System.currentTimeMillis();
+                String toolResult;
+                try {
+                    toolResult = executeToolCall(toolCall, agent.getId());
+                    long toolMs = System.currentTimeMillis() - toolStart;
+                    log.info("action=tool_call_done sessionId={} agentId={} tool={} durationMs={} resultLen={}",
+                            sessionId, agent.getId(), toolCall.getName(), toolMs, toolResult.length());
+                    metrics.mcpToolCallIncrement(toolCall.getName(), true);
+                    metrics.mcpToolCallDuration(toolCall.getName(), toolMs);
+                } catch (Exception e) {
+                    long toolMs = System.currentTimeMillis() - toolStart;
+                    log.error("action=tool_call_error sessionId={} agentId={} tool={} durationMs={} error={}",
+                            sessionId, agent.getId(), toolCall.getName(), toolMs, e.getMessage());
+                    metrics.mcpToolCallIncrement(toolCall.getName(), false);
+                    metrics.mcpToolCallDuration(toolCall.getName(), toolMs);
+                    throw e;
+                }
 
                 com.hify.provider.dto.ChatMessage toolMsg = new com.hify.provider.dto.ChatMessage();
                 toolMsg.setRole("tool");
@@ -260,7 +317,6 @@ public class ChatServiceImpl implements ChatService {
                 messages.add(toolMsg);
             }
 
-            // 第二次 LLM 调用，基于工具结果生成最终回答（流式推送）
             ChatRequest secondReq = ChatRequest.builder()
                     .modelId(modelConfig.getModelId())
                     .messages(messages)
@@ -268,20 +324,38 @@ public class ChatServiceImpl implements ChatService {
                     .maxTokens(agent.getMaxTokens())
                     .build();
 
-            llmResp = adapter.streamChat(provider, secondReq, delta -> {
-                try {
-                    String event = objectMapper.writeValueAsString(Map.of("type", "delta", "content", delta));
-                    emitter.send(SseEmitter.event().data(event));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            log.info("[MCP] 第二次 LLM 调用完成 session={} finishReason={}", sessionId, llmResp.getFinishReason());
+            log.info("action=llm_call_start sessionId={} agentId={} providerId={} modelName={} round=2",
+                    sessionId, agent.getId(), provider.getId(), modelConfig.getModelId());
+
+            long secondStart = System.currentTimeMillis();
+            try {
+                llmResp = adapter.streamChat(provider, secondReq, delta -> {
+                    try {
+                        String event = objectMapper.writeValueAsString(Map.of("type", "delta", "content", delta));
+                        emitter.send(SseEmitter.event().data(event));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } catch (Exception e) {
+                long failMs = System.currentTimeMillis() - secondStart;
+                log.error("action=llm_call_done sessionId={} agentId={} providerId={} modelName={} durationMs={} success=false round=2 error={}",
+                        sessionId, agent.getId(), provider.getId(), modelConfig.getModelId(), failMs, e.getMessage(), e);
+                metrics.llmCallIncrement(provider.getType(), modelConfig.getModelId(), false);
+                metrics.llmCallDuration(provider.getType(), modelConfig.getModelId(), failMs);
+                throw e;
+            }
+            long secondMs = System.currentTimeMillis() - secondStart;
+            log.info("action=llm_call_done sessionId={} agentId={} providerId={} modelName={} durationMs={} success=true finishReason={} round=2",
+                    sessionId, agent.getId(), provider.getId(), modelConfig.getModelId(),
+                    secondMs, llmResp.getFinishReason());
+            metrics.llmCallIncrement(provider.getType(), modelConfig.getModelId(), true);
+            metrics.llmCallDuration(provider.getType(), modelConfig.getModelId(), secondMs);
         }
 
         int latencyMs = (int) (System.currentTimeMillis() - start);
 
-        // 12. Save assistant message to MySQL
+        // 12. Save assistant message
         saveMessage(sessionId, "assistant", llmResp.getContent(),
                 llmResp.getCompletionTokens(), llmResp.getFinishReason(), latencyMs);
 
@@ -295,6 +369,10 @@ public class ChatServiceImpl implements ChatService {
                 "latencyMs", latencyMs));
         emitter.send(SseEmitter.event().data(doneEvent));
         emitter.complete();
+
+        log.info("action=chat_stream_done sessionId={} agentId={} totalMs={}", sessionId, agent.getId(), latencyMs);
+        metrics.chatRequestIncrement(agentIdStr);
+        metrics.chatRequestDuration(agentIdStr, System.currentTimeMillis() - chatBegin);
     }
 
     // ── 同步对话 ──────────────────────────────────────────────
@@ -336,8 +414,19 @@ public class ChatServiceImpl implements ChatService {
                 .build();
 
         long start = System.currentTimeMillis();
-        ChatResponse llmResp = adapterFactory.get(provider.getType()).chat(provider, chatRequest);
+        boolean llmSuccess = false;
+        ChatResponse llmResp;
+        try {
+            llmResp = adapterFactory.get(provider.getType()).chat(provider, chatRequest);
+            llmSuccess = true;
+        } finally {
+            long llmMs = System.currentTimeMillis() - start;
+            metrics.llmCallIncrement(provider.getType(), modelConfig.getModelId(), llmSuccess);
+            metrics.llmCallDuration(provider.getType(), modelConfig.getModelId(), llmMs);
+        }
         int latencyMs = (int) (System.currentTimeMillis() - start);
+        metrics.chatRequestIncrement(String.valueOf(agent.getId()));
+        metrics.chatRequestDuration(String.valueOf(agent.getId()), latencyMs);
 
         ChatMessage saved = saveMessage(sessionId, "assistant", llmResp.getContent(),
                 llmResp.getCompletionTokens(), llmResp.getFinishReason(), latencyMs);
